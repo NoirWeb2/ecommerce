@@ -8,14 +8,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "lh3.googleusercontent.com" },
     ],
   },
-  serverExternalPackages: ["@prisma/client", "prisma"],
+  serverExternalPackages: ["@prisma/client", "prisma", "bcryptjs", "cloudinary"],
 };
 
 export default nextConfig;
-
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  output: 'standalone',
-};
-
-module.exports = nextConfig;
