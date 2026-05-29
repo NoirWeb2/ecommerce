@@ -71,7 +71,10 @@ const uploadToCloudinary = async (file: File) => {
 };
 
 const processUrl = async (url: string) => {
-  if (!url) return;
+  if (!url) {
+    onChange(blankMeta());
+    return;
+  }
   const { w, h } = await getSize(url);
   onChange({ url, width: w || null, height: h || null, fileName: url.split("/").pop() ?? "" });
 };
@@ -101,7 +104,7 @@ return (
           <img src={value.url} alt="preview" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-noir-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
             <Upload size={20} className="text-white" />
-            <span className="text-white text-xs font-bold ml-2">CAMBIAR</span>
+            <span className="text-white text-xs font-bold ml-2">SUBIR OTRA</span>
           </div>
         </div>
       ) : (
@@ -114,6 +117,7 @@ return (
       <input ref={fileRef} type="file" accept="image/*" className="hidden"
         onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadToCloudinary(f); e.target.value = ""; }} />
     </div>
+
     <div className="mt-2 flex items-center gap-2">
       <span className="text-[10px] text-noir-gray-4">o URL:</span>
       <input type="text" placeholder="https://res.cloudinary.com/... o /imagen.jpg"
@@ -123,19 +127,27 @@ return (
         onClick={(e) => e.stopPropagation()}
         className="flex-1 border border-noir-gray-2 px-3 py-1.5 text-xs outline-none focus:border-noir-black transition-colors" />
     </div>
+
     {value.url && !uploading && (
-      <p className="text-[10px] text-noir-gray-4 mt-1.5 flex items-center gap-2">
-        {value.fileName && <span className="font-mono truncate max-w-[140px]">{value.fileName}</span>}
-        {value.width && value.height && (
-          <span className="bg-noir-gray px-1.5 py-0.5 font-bold text-noir-black">
-            {value.width}×{value.height}px
+      <div className="mt-3 flex items-center justify-between border border-red-200 bg-red-50 px-3 py-2 rounded-sm">
+        <div className="flex items-center gap-2 text-red-800">
+          {value.width && value.height && (
+            <span className="bg-red-200/50 px-1.5 py-0.5 text-[10px] font-bold rounded">
+              {value.width}×{value.height}px
+            </span>
+          )}
+          <span className="text-[10px] font-mono truncate max-w-[150px] sm:max-w-[200px]">
+            {value.fileName || "Imagen actual"}
           </span>
-        )}
-        <button type="button" onClick={(e) => { e.stopPropagation(); onChange(blankMeta()); }}
-          className="text-noir-gray-4 hover:text-red-500 transition-colors ml-auto">
-          <X size={12} />
+        </div>
+        <button 
+          type="button" 
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onChange(blankMeta()); }}
+          className="flex items-center gap-1.5 text-[10px] font-bold text-red-600 hover:text-red-800 uppercase tracking-widest transition-colors"
+        >
+          <Trash2 size={13} /> Eliminar
         </button>
-      </p>
+      </div>
     )}
   </div>
 );
@@ -238,7 +250,7 @@ const [filosofia, setFilosofia] = useState({
   pilar2Title: "CONSTRUCCIÓN",
   pilar2Text: "Materiales premium, cortes colombianos, acabados que duran. Calidad sin excusas, desde Bogotá.",
   pilar3Title: "ACTITUD",
-  pilar3Text: "NOIR LOVERS no es ropa. Es la forma en que entras a un cuarto. La presencia que no necesita explicación.",
+  pilar3Text: "NOIR LOVERS no es ropa. Es la forma en que entras a un cuarto. La presencia que no necesita explanation.",
   bannerLabel: "COLECCIÓN NOIR",
   bannerHeadline: "VISTE LA\nOSCURIDAD.",
   bannerImage: blankMeta(),
@@ -265,9 +277,7 @@ const [editPageId, setEditPageId] = useState<string | null>(null);
 const [saving, setSaving] = useState(false);
 const [loading, setLoading] = useState(true);
 
-// ── FIXED: Load saved data from DB ──────────────────────────────────────
 useEffect(() => {
-  // 💡 AQUI AGREGMOS EL { cache: "no-store" }
   fetch("/api/admin/pages", { cache: "no-store" })
     .then((r) => r.json())
     .then(({ data }) => {
@@ -292,7 +302,7 @@ useEffect(() => {
         setTexts((prev) => prev.map((t) => td[t.id] ? { ...t, content: td[t.id] } : t));
       }
 
-      // Filosofia — saved under section "pages", key "filosofia"
+      // Filosofia
       const filosofiaRaw = data.pages?.filosofia ?? data.filosofia?.data;
       if (filosofiaRaw) {
         try {
@@ -304,28 +314,28 @@ useEffect(() => {
             splitImage: blankMeta(parsed.splitImage?.url ?? parsed.splitImage ?? ""),
             bannerImage: blankMeta(parsed.bannerImage?.url ?? parsed.bannerImage ?? ""),
           }));
-        } catch { /* keep defaults */ }
+        } catch { }
       }
 
-      // Contacto — saved under section "pages", key "contacto"
+      // Contacto
       const contactoRaw = data.pages?.contacto ?? data.contacto?.data;
       if (contactoRaw) {
-        try { setContacto((prev) => ({ ...prev, ...JSON.parse(contactoRaw) })); } catch { /* keep defaults */ }
+        try { setContacto((prev) => ({ ...prev, ...JSON.parse(contactoRaw) })); } catch { }
       }
 
       // Header
       const headerRaw = data.header?.data;
       if (headerRaw) {
-        try { setHeader((prev) => ({ ...prev, ...JSON.parse(headerRaw) })); } catch { /* keep defaults */ }
+        try { setHeader((prev) => ({ ...prev, ...JSON.parse(headerRaw) })); } catch { }
       }
 
-      // Footer — saved under section "layout", key "footer"
+      // Footer
       const footerRaw = data.layout?.footer ?? data.footer?.data;
       if (footerRaw) {
-        try { setFooter((prev) => ({ ...prev, ...JSON.parse(footerRaw) })); } catch { /* keep defaults */ }
+        try { setFooter((prev) => ({ ...prev, ...JSON.parse(footerRaw) })); } catch { }
       }
     })
-    .catch(() => { /* use defaults */ })
+    .catch(() => { })
     .finally(() => setLoading(false));
 }, []);
 
@@ -334,7 +344,6 @@ const updateBanner = (id: string, patch: Partial<BannerBlock>) =>
 const updateText = (id: string, content: string) =>
   setTexts((prev) => prev.map((t) => (t.id === id ? { ...t, content } : t)));
 
-// ── FIXED: handleSave uses correct section/key per data type ────────────
 const handleSave = async (section = "Cambios") => {
   setSaving(true);
   try {
@@ -359,7 +368,6 @@ const handleSave = async (section = "Cambios") => {
       for (const t of texts) textData[t.id] = t.content;
       body = { section: "texts", data: textData };
     } else if (section === "Filosofía") {
-      // Serialize images as URL strings for storage
       const toSave = {
         ...filosofia,
         heroImage: filosofia.heroImage.url,
