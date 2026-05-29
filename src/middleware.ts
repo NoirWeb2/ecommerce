@@ -3,22 +3,40 @@ import { NextRequest, NextResponse } from "next/server";
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // Siempre redirigir /admin al login
-  if (pathname === "/admin") {
-    return NextResponse.redirect(new URL("/admin/login", req.url));
+  // Read auth cookie
+  const token = req.cookies.get("auth-token")?.value;
+
+  // =========================
+  // ADMIN ROUTES
+  // =========================
+
+  if (pathname.startsWith("/admin")) {
+    // Allow login page
+    if (pathname === "/admin/login") {
+      // If already logged in -> redirect to admin
+      if (token) {
+        return NextResponse.redirect(new URL("/admin", req.url));
+      }
+
+      return NextResponse.next();
+    }
+
+    // Any other admin route requires auth
+    if (!token) {
+      return NextResponse.redirect(new URL("/admin/login", req.url));
+    }
   }
 
-  // Proteger rutas internas del admin
-  if (
-    pathname.startsWith("/admin/") &&
-    pathname !== "/admin/login"
-  ) {
-    const token = req.cookies.get("auth-token")?.value;
+  // =========================
+  // CUSTOMER ACCOUNT ROUTES
+  // =========================
 
+  if (pathname.startsWith("/cuenta")) {
     if (!token) {
-      return NextResponse.redirect(
-        new URL("/admin/login", req.url)
-      );
+      const loginUrl = new URL("/login", req.url);
+      loginUrl.searchParams.set("redirect", pathname);
+
+      return NextResponse.redirect(loginUrl);
     }
   }
 
@@ -26,5 +44,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/admin/:path*", "/cuenta/:path*"],
 };
