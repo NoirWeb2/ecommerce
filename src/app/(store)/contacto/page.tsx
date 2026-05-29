@@ -3,7 +3,6 @@
 import { Mail, Phone, Instagram, MapPin, Send } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { createClient } from "@/lib/supabase/client"; // ajusta este import a como lo tienes en tu proyecto
 
 interface ContactoData {
   email: string;
@@ -14,28 +13,24 @@ interface ContactoData {
   horario: string;
 }
 
+const defaults: ContactoData = {
+  email: "hola@noirlovers.co",
+  whatsapp: "+57 300 000 0000",
+  instagram: "@noirlovers.co",
+  tiktok: "@noirlovers",
+  ciudad: "Bogotá, Colombia",
+  horario: "Lunes a Viernes 9am – 6pm",
+};
+
 export default function ContactoPage() {
   const [form, setForm] = useState({ nombre: "", email: "", mensaje: "" });
   const [loading, setLoading] = useState(false);
-  const [contacto, setContacto] = useState<ContactoData>({
-    email: "hola@noirlovers.co",
-    whatsapp: "+57 300 000 0000",
-    instagram: "@noirlovers.co",
-    tiktok: "@noirlovers",
-    ciudad: "Bogotá, Colombia",
-    horario: "Lunes a Viernes 9am – 6pm",
-  });
+  const [contacto, setContacto] = useState<ContactoData>(defaults);
 
   useEffect(() => {
-    const supabase = createClient();
-    supabase
-      .from("site_settings")
-      .select("value")
-      .eq("key", "contacto")
-      .single()
-      .then(({ data }) => {
-        if (data?.value) setContacto(JSON.parse(data.value));
-      });
+    fetch("/api/pages?section=pages&key=contacto")
+      .then((r) => r.json())
+      .then(({ data }) => { if (data) setContacto(data); });
   }, []);
 
   const contactInfo = [
@@ -79,9 +74,7 @@ export default function ContactoPage() {
             <li key={item.label} className="flex items-center gap-3">
               <span className="text-noir-gray-4">{item.icon}</span>
               {item.href ? (
-                <a href={item.href} className="text-sm font-medium hover:underline underline-offset-2">
-                  {item.label}
-                </a>
+                <a href={item.href} className="text-sm font-medium hover:underline underline-offset-2">{item.label}</a>
               ) : (
                 <span className="text-sm font-medium">{item.label}</span>
               )}
@@ -117,9 +110,7 @@ export default function ContactoPage() {
           className="w-full bg-noir-black text-white py-4 text-sm font-bold tracking-widest uppercase hover:bg-black transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
           {loading ? (
             <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-          ) : (
-            <><Send size={14} />ENVIAR MENSAJE</>
-          )}
+          ) : (<><Send size={14} />ENVIAR MENSAJE</>)}
         </button>
       </form>
     </div>
