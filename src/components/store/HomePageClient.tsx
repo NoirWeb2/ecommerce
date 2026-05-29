@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
@@ -10,10 +9,6 @@ Truck,
 Clock,
 RefreshCw,
 } from "lucide-react";
-
-import Navbar from "@/components/store/Navbar";
-import Footer from "@/components/store/Footer";
-import CartSidebar from "@/components/store/CartSidebar";
 
 import { useCartStore } from "@/store/cart";
 import { formatPrice } from "@/lib/utils";
@@ -46,7 +41,8 @@ return (
         className="relative overflow-hidden bg-[#F2F2F2]"
         style={{ aspectRatio: "3/4" }}
       >
-        <Image
+        {/* Cambiado a <img> para evitar bloqueos de Cloudinary */}
+        <img
           src={
             hovered
               ? product.images?.[1] ||
@@ -55,27 +51,22 @@ return (
               : product.images?.[0] || "/placeholder-product.jpg"
           }
           alt={product.name}
-          fill
-          className="object-cover transition-all duration-500"
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+          className="absolute inset-0 w-full h-full object-cover transition-all duration-500"
         />
 
         <div className="absolute bottom-0 left-0 right-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300 p-2">
           <button
             onClick={(e) => {
               e.preventDefault();
-
               addItem({
                 id: nanoid(),
                 productId: product.id,
                 name: product.name,
                 price: product.price,
-                image:
-                  product.images?.[0] || "/placeholder-product.jpg",
+                image: product.images?.[0] || "/placeholder-product.jpg",
                 quantity: 1,
                 slug: product.slug,
               });
-
               toast.success("Agregado al carrito");
             }}
             className="w-full bg-noir-black text-white text-[10px] font-bold tracking-[0.15em] uppercase py-[10px] hover:bg-black transition-colors"
@@ -111,7 +102,6 @@ function ProductRow({ products }: { products: Product[] }) {
 const [page, setPage] = useState(0);
 
 const max = Math.ceil(products.length / 5) - 1;
-
 const visible = products.slice(page * 5, page * 5 + 5);
 
 return (
@@ -150,210 +140,193 @@ pageData,
 }: {
 pageData: HomePageData;
 }) {
-const { heroBanner, collection1Banner, collection2Banner } = pageData;
-
+const { heroBanner, collection1Banner } = pageData;
 const [products, setProducts] = useState<Product[]>([]);
 
 useEffect(() => {
   async function loadProducts() {
     try {
       const res = await fetch("/api/products");
-
       if (!res.ok) return;
-
       const data = await res.json();
-
       setProducts(data.products || []);
     } catch (error) {
       console.error(error);
     }
   }
-
   loadProducts();
 }, []);
 
 return (
-  <>
-    <Navbar />
-    <CartSidebar />
+  <main>
+    {/* ── HERO BANNER ── */}
+    {heroBanner.visible !== false && (
+      <section
+        className="relative w-full overflow-hidden"
+        style={{ height: "86vh", minHeight: 520 }}
+      >
+        <img
+          src={heroBanner.image || "/hero-main.jpg"}
+          alt="NOIR LOVERS"
+          className="absolute inset-0 w-full h-full object-cover object-center"
+        />
 
-    <main>
-      {heroBanner.visible !== false && (
-        <section
-          className="relative w-full overflow-hidden"
-          style={{ height: "86vh", minHeight: 520 }}
-        >
-          <Image
-            src={heroBanner.image || "/hero-main.jpg"}
-            alt="NOIR LOVERS"
-            fill
-            className="object-cover object-center"
-            priority
-            sizes="100vw"
-          />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-black/15 to-black/65" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/55 to-transparent" />
 
-          <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-black/15 to-black/65" />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/55 to-transparent" />
-
-          <div className="absolute bottom-0 left-0 px-8 md:px-14 pb-14 md:pb-20">
-            <p
-              className={`text-[10px] font-semibold tracking-[0.35em] uppercase mb-3 ${
-                heroBanner.textColor === "black"
-                  ? "text-black/65"
-                  : "text-white/65"
-              }`}
-            >
-              NUEVA COLECCIÓN 2025
-            </p>
-
-            <h1
-              className={`font-black uppercase leading-[0.88] tracking-tight ${
-                heroBanner.textColor === "black"
-                  ? "text-black"
-                  : "text-white"
-              }`}
-              style={{
-                fontSize: "clamp(62px, 10.5vw, 130px)",
-              }}
-            >
-              {heroBanner.headline}
-            </h1>
-
-            <p
-              className={`text-[13px] mt-4 max-w-[260px] leading-relaxed ${
-                heroBanner.textColor === "black"
-                  ? "text-black/60"
-                  : "text-white/60"
-              }`}
-            >
-              {heroBanner.subtext}
-            </p>
-
-            <Link
-              href={heroBanner.ctaLink || "/tienda"}
-              className={`inline-block mt-7 text-[10px] font-bold tracking-[0.22em] uppercase px-7 py-[11px] transition-colors ${
-                heroBanner.textColor === "black"
-                  ? "border border-black/75 text-black hover:bg-black hover:text-white"
-                  : "border border-white/75 text-white hover:bg-white hover:text-noir-black"
-              }`}
-            >
-              {heroBanner.cta || "VER LA COLECCIÓN"}
-            </Link>
-          </div>
-        </section>
-      )}
-
-      <section className="bg-white pt-11 pb-12">
-        <div className="max-w-screen-xl mx-auto px-6">
-          <p className="text-center text-[10px] font-bold tracking-[0.35em] uppercase mb-8">
-            DESTACADOS
+        <div className="absolute bottom-0 left-0 px-8 md:px-14 pb-14 md:pb-20">
+          <p
+            className={`text-[10px] font-semibold tracking-[0.35em] uppercase mb-3 ${
+              heroBanner.textColor === "black"
+                ? "text-black/65"
+                : "text-white/65"
+            }`}
+          >
+            NUEVA COLECCIÓN
           </p>
 
-          <div className="space-y-6">
-            <ProductRow products={products.slice(0, 5)} />
-          </div>
+          <h1
+            className={`font-black uppercase leading-[0.88] tracking-tight ${
+              heroBanner.textColor === "black" ? "text-black" : "text-white"
+            }`}
+            style={{
+              fontSize: "clamp(62px, 10.5vw, 130px)",
+            }}
+          >
+            {heroBanner.headline}
+          </h1>
 
-          <div className="text-center mt-10">
-            <Link
-              href="/tienda"
-              className="inline-block border border-noir-black text-[10px] font-bold tracking-[0.22em] uppercase px-10 py-[11px] hover:bg-noir-black hover:text-white transition-colors"
-            >
-              VER TODA LA COLECCIÓN
-            </Link>
-          </div>
+          <p
+            className={`text-[13px] mt-4 max-w-[260px] leading-relaxed ${
+              heroBanner.textColor === "black"
+                ? "text-black/60"
+                : "text-white/60"
+            }`}
+          >
+            {heroBanner.subtext}
+          </p>
+
+          <Link
+            href={heroBanner.ctaLink || "/tienda"}
+            className={`inline-block mt-7 text-[10px] font-bold tracking-[0.22em] uppercase px-7 py-[11px] transition-colors ${
+              heroBanner.textColor === "black"
+                ? "border border-black/75 text-black hover:bg-black hover:text-white"
+                : "border border-white/75 text-white hover:bg-white hover:text-noir-black"
+            }`}
+          >
+            {heroBanner.cta || "VER LA COLECCIÓN"}
+          </Link>
         </div>
       </section>
+    )}
 
-      {collection1Banner.visible !== false && (
-        <section
-          className="relative w-full overflow-hidden"
-          style={{ height: "68vh", minHeight: 440 }}
-        >
-          <Image
-            src={collection1Banner.image || "/banner-collection-1.webp"}
-            alt={collection1Banner.headline || "UNIQUE VIBE"}
-            fill
-            className="object-cover object-center"
-            sizes="100vw"
-          />
+    {/* ── DESTACADOS ── */}
+    <section className="bg-white pt-11 pb-12">
+      <div className="max-w-screen-xl mx-auto px-6">
+        <p className="text-center text-[10px] font-bold tracking-[0.35em] uppercase mb-8">
+          DESTACADOS
+        </p>
 
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+        <div className="space-y-6">
+          <ProductRow products={products.slice(0, 5)} />
+        </div>
 
-          <div className="absolute bottom-0 left-0 right-0 flex flex-col items-center pb-12 text-center">
-            <p
-              className={`font-black uppercase leading-none tracking-tight drop-shadow-lg ${
-                collection1Banner.textColor === "black"
-                  ? "text-black"
-                  : "text-white"
-              }`}
-              style={{
-                fontSize: "clamp(34px, 6.5vw, 82px)",
-              }}
-            >
-              {collection1Banner.headline}
-            </p>
+        <div className="text-center mt-10">
+          <Link
+            href="/tienda"
+            className="inline-block border border-noir-black text-[10px] font-bold tracking-[0.22em] uppercase px-10 py-[11px] hover:bg-noir-black hover:text-white transition-colors"
+          >
+            VER TODA LA COLECCIÓN
+          </Link>
+        </div>
+      </div>
+    </section>
 
-            <p
-              className={`text-[10px] font-bold tracking-[0.4em] uppercase mt-1 mb-5 drop-shadow ${
-                collection1Banner.textColor === "black"
-                  ? "text-black/70"
-                  : "text-white/70"
-              }`}
-            >
-              {collection1Banner.subtext}
-            </p>
+    {/* ── COLLECTION BANNER ── */}
+    {collection1Banner.visible !== false && (
+      <section
+        className="relative w-full overflow-hidden"
+        style={{ height: "68vh", minHeight: 440 }}
+      >
+        <img
+          src={collection1Banner.image || "/banner-collection-1.webp"}
+          alt={collection1Banner.headline || "UNIQUE VIBE"}
+          className="absolute inset-0 w-full h-full object-cover object-center"
+        />
 
-            <Link
-              href={collection1Banner.ctaLink || "/tienda"}
-              className={`inline-block text-[10px] font-bold tracking-[0.2em] uppercase px-8 py-[10px] transition-colors ${
-                collection1Banner.textColor === "black"
-                  ? "border border-black text-black hover:bg-black hover:text-white"
-                  : "border border-white text-white hover:bg-white hover:text-noir-black"
-              }`}
-            >
-              {collection1Banner.cta || "CONTINUAR"}
-            </Link>
-          </div>
-        </section>
-      )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
 
-      <section className="bg-white border-t border-noir-gray-2 py-9">
-        <div className="max-w-screen-xl mx-auto px-8 flex flex-col sm:flex-row items-center justify-center gap-10 sm:gap-20">
-          {[
-            {
-              icon: <Truck size={19} strokeWidth={1.5} />,
-              label: "ENVÍO GRATIS",
-              sub: "Desde $250.000",
-            },
-            {
-              icon: <Clock size={19} strokeWidth={1.5} />,
-              label: "2-5 DÍAS HÁBILES",
-              sub: "Entrega estimada",
-            },
-            {
-              icon: <RefreshCw size={19} strokeWidth={1.5} />,
-              label: "DEVOLUCIONES SENCILLAS",
-              sub: "30 días sin preguntas",
-            },
-          ].map((b) => (
-            <div
-              key={b.label}
-              className="flex flex-col items-center gap-[7px] text-center"
-            >
-              <div className="text-noir-black">{b.icon}</div>
+        <div className="absolute bottom-0 left-0 right-0 flex flex-col items-center pb-12 text-center">
+          <p
+            className={`font-black uppercase leading-none tracking-tight drop-shadow-lg ${
+              collection1Banner.textColor === "black"
+                ? "text-black"
+                : "text-white"
+            }`}
+            style={{
+              fontSize: "clamp(34px, 6.5vw, 82px)",
+            }}
+          >
+            {collection1Banner.headline}
+          </p>
 
-              <p className="text-[10px] font-black tracking-[0.18em] uppercase">
-                {b.label}
-              </p>
+          <p
+            className={`text-[10px] font-bold tracking-[0.4em] uppercase mt-1 mb-5 drop-shadow ${
+              collection1Banner.textColor === "black"
+                ? "text-black/70"
+                : "text-white/70"
+            }`}
+          >
+            {collection1Banner.subtext}
+          </p>
 
-              <p className="text-[10px] text-noir-gray-4">{b.sub}</p>
-            </div>
-          ))}
+          <Link
+            href={collection1Banner.ctaLink || "/tienda"}
+            className={`inline-block text-[10px] font-bold tracking-[0.2em] uppercase px-8 py-[10px] transition-colors ${
+              collection1Banner.textColor === "black"
+                ? "border border-black text-black hover:bg-black hover:text-white"
+                : "border border-white text-white hover:bg-white hover:text-noir-black"
+            }`}
+          >
+            {collection1Banner.cta || "CONTINUAR"}
+          </Link>
         </div>
       </section>
-    </main>
+    )}
 
-    <Footer />
-  </>
+    {/* ── BENEFITS ── */}
+    <section className="bg-white border-t border-noir-gray-2 py-9">
+      <div className="max-w-screen-xl mx-auto px-8 flex flex-col sm:flex-row items-center justify-center gap-10 sm:gap-20">
+        {[
+          {
+            icon: <Truck size={19} strokeWidth={1.5} />,
+            label: "ENVÍO GRATIS",
+            sub: "Desde $250.000",
+          },
+          {
+            icon: <Clock size={19} strokeWidth={1.5} />,
+            label: "2-5 DÍAS HÁBILES",
+            sub: "Entrega estimada",
+          },
+          {
+            icon: <RefreshCw size={19} strokeWidth={1.5} />,
+            label: "DEVOLUCIONES SENCILLAS",
+            sub: "30 días sin preguntas",
+          },
+        ].map((b) => (
+          <div
+            key={b.label}
+            className="flex flex-col items-center gap-[7px] text-center"
+          >
+            <div className="text-noir-black">{b.icon}</div>
+            <p className="text-[10px] font-black tracking-[0.18em] uppercase">
+              {b.label}
+            </p>
+            <p className="text-[10px] text-noir-gray-4">{b.sub}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  </main>
 );
 }
