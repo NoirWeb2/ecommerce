@@ -2,7 +2,6 @@
 import Navbar from "@/components/store/Navbar";
 import Footer from "@/components/store/Footer";
 import CartSidebar from "@/components/store/CartSidebar";
-import AnnouncementBar from "@/components/store/AnnouncementBar";
 import { prisma } from "@/lib/prisma";
 
 export default async function StoreLayout({
@@ -10,7 +9,6 @@ children,
 }: {
 children: React.ReactNode;
 }) {
-// Lee datos del admin desde la DB
 const settings = await prisma.siteSetting.findMany({
   where: {
     section: { in: ["texts", "header", "layout"] }
@@ -23,15 +21,13 @@ for (const s of settings) {
   map[s.section][s.key] = s.value;
 }
 
-// Parsea header
 let headerData = null;
 try {
-  headerData = map["header"]?.["data"] 
-    ? JSON.parse(map["header"]["data"]) 
+  headerData = map["header"]?.["data"]
+    ? JSON.parse(map["header"]["data"])
     : null;
 } catch {}
 
-// Parsea footer
 let footerData = null;
 try {
   footerData = map["layout"]?.["footer"]
@@ -43,8 +39,8 @@ const announcementText = map["texts"]?.["announcement"] ?? null;
 
 return (
   <>
-    <AnnouncementBar text={announcementText} />
-    <Navbar headerData={headerData} />
+    {/* ✅ Solo el Navbar — ya tiene el ticker adentro */}
+    <Navbar headerData={{ ...headerData, announcementText }} />
     <CartSidebar />
     <main>{children}</main>
     <Footer footerData={footerData} />
