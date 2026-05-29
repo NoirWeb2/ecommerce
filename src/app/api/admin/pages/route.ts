@@ -24,8 +24,23 @@ export async function GET() {
   if (!admin) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 
   const settings = await prisma.siteSetting.findMany({
-    where: { section: { in: ["banners", "texts", "header", "footer", "filosofia", "contacto", "seo"] } },
-  });
+where: {
+  section: {
+    in: [
+      "banners",
+      "texts", 
+      "header",
+      "footer",
+      "filosofia",
+      "contacto",
+      "seo",
+      "pages",   // ← nuevo
+      "layout",  // ← nuevo
+      "home"     // ← nuevo
+    ]
+  }
+},
+});
 
   const result: Record<string, Record<string, string>> = {};
   for (const s of settings) {
