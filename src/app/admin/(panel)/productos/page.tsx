@@ -384,7 +384,7 @@ return (
                           </div>
                           <span className="text-sm font-medium line-clamp-2 max-w-[200px] flex items-center gap-2">
                             {p.name}
-                            {p.isFeatured && <Star size={12} className="text-yellow-500 fill-yellow-500 flex-shrink-0" title="Destacado" />}
+                            {p.isFeatured && <Star size={12} className="text-yellow-500 fill-yellow-500 flex-shrink-0" />}
                           </span>
                         </div>
                       </td>
