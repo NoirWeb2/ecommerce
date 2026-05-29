@@ -16,12 +16,13 @@ status: "ACTIVE" | "DRAFT" | "ARCHIVED";
 category: { id: string; name: string } | null;
 images: ProductImage[];
 variants: Variant[];
-isFeatured: boolean; // <--- NUEVO
+isFeatured: boolean;
 }
 interface Category {
 id: string;
 name: string;
 slug: string;
+image: string | null; // 💡 NUEVO
 _count: { products: number };
 }
 
@@ -31,9 +32,10 @@ return variants.reduce((sum, v) => sum + v.stock, 0);
 
 // ── Image Uploader Component ─────────────────────────────────────────────────
 
-function ImageUploader({ images, onChange }: {
+function ImageUploader({ images, onChange, single = false }: {
 images: string[];
 onChange: (urls: string[]) => void;
+single?: boolean; // 💡 NUEVO: para que las categorías solo suban 1 foto
 }) {
 const fileRef = useRef<HTMLInputElement>(null);
 const [dragging, setDragging] = useState(false);
@@ -56,10 +58,11 @@ const handleFiles = async (files: FileList | File[]) => {
     if (!file.type.startsWith("image/")) continue;
     const url = await uploadFile(file);
     if (url) newUrls.push(url);
+    if (single) break; // Si es single, solo sube la primera
   }
-  onChange([...images, ...newUrls]);
+  onChange(single ? newUrls : [...images, ...newUrls]);
   setUploading(false);
-  if (newUrls.length) toast.success(`${newUrls.length} imagen(es) subida(s)`);
+  if (newUrls.length) toast.success(`Imagen subida`);
 };
 
 const removeImage = (idx: number) => {
@@ -68,63 +71,61 @@ const removeImage = (idx: number) => {
 
 return (
   <div>
-    <label className="block text-[10px] font-bold tracking-widest uppercase mb-2">IMÁGENES</label>
+    <label className="block text-[10px] font-bold tracking-widest uppercase mb-2">
+      {single ? "IMAGEN DE CATEGORÍA" : "IMÁGENES"}
+    </label>
 
     {images.length > 0 && (
       <div className="flex gap-2 flex-wrap mb-3">
         {images.map((url, i) => (
-          <div key={i} className="relative w-16 h-20 bg-noir-gray overflow-hidden group">
+          <div key={i} className="relative w-20 h-24 bg-noir-gray overflow-hidden group">
             <img src={url} alt="" className="w-full h-full object-cover" />
             <button
               type="button"
               onClick={() => removeImage(i)}
-              className="absolute top-0.5 right-0.5 bg-red-600 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
             >
-              <X size={10} />
+              <X size={12} />
             </button>
-            {i === 0 && (
-              <div className="absolute bottom-0 inset-x-0 bg-noir-black/60 text-white text-[8px] font-bold text-center py-0.5">
-                PRINCIPAL
-              </div>
-            )}
           </div>
         ))}
       </div>
     )}
 
-    <div
-      onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
-      onDragLeave={() => setDragging(false)}
-      onDrop={(e) => {
-        e.preventDefault(); setDragging(false);
-        handleFiles(e.dataTransfer.files);
-      }}
-      onClick={() => !uploading && fileRef.current?.click()}
-      className={`border-2 border-dashed transition-colors cursor-pointer flex flex-col items-center justify-center py-5 gap-2 ${
-        dragging ? "border-noir-black bg-noir-gray" : "border-noir-gray-2 hover:border-noir-black"
-      } ${uploading ? "opacity-60 cursor-not-allowed" : ""}`}
-    >
-      {uploading ? (
-        <>
-          <Loader2 size={20} className="text-noir-gray-4 animate-spin" />
-          <p className="text-xs text-noir-gray-4">Subiendo...</p>
-        </>
-      ) : (
-        <>
-          <Upload size={18} className="text-noir-gray-4" />
-          <p className="text-xs text-noir-gray-4 text-center px-4">
-            Arrastra imágenes aquí o haz clic para subir
-          </p>
-          <p className="text-[9px] text-noir-gray-4">JPG, PNG, WEBP — se suben a Cloudinary</p>
-        </>
-      )}
-    </div>
+    {(!single || images.length === 0) && (
+      <div
+        onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={(e) => {
+          e.preventDefault(); setDragging(false);
+          handleFiles(e.dataTransfer.files);
+        }}
+        onClick={() => !uploading && fileRef.current?.click()}
+        className={`border-2 border-dashed transition-colors cursor-pointer flex flex-col items-center justify-center py-5 gap-2 ${
+          dragging ? "border-noir-black bg-noir-gray" : "border-noir-gray-2 hover:border-noir-black"
+        } ${uploading ? "opacity-60 cursor-not-allowed" : ""}`}
+      >
+        {uploading ? (
+          <>
+            <Loader2 size={20} className="text-noir-gray-4 animate-spin" />
+            <p className="text-xs text-noir-gray-4">Subiendo...</p>
+          </>
+        ) : (
+          <>
+            <Upload size={18} className="text-noir-gray-4" />
+            <p className="text-xs text-noir-gray-4 text-center px-4">
+              Arrastra una imagen aquí o haz clic
+            </p>
+          </>
+        )}
+      </div>
+    )}
 
     <input
       ref={fileRef}
       type="file"
       accept="image/*"
-      multiple
+      multiple={!single}
       className="hidden"
       onChange={(e) => e.target.files && handleFiles(e.target.files)}
     />
@@ -156,10 +157,13 @@ const [createOpen, setCreateOpen] = useState(false);
 const [createForm, setCreateForm] = useState<{ name: string; sku: string; price: number; stock: number; status: "ACTIVE" | "DRAFT" | "ARCHIVED"; categoryName: string; description: string; images: string[]; isFeatured: boolean }>({ name: "", sku: "", price: 0, stock: 0, status: "DRAFT", categoryName: "", description: "", images: [], isFeatured: false });
 const [creating, setCreating] = useState(false);
 
+// Categories
 const [newCatName, setNewCatName] = useState("");
-const [editCatId, setEditCatId] = useState<string | null>(null);
-const [editCatName, setEditCatName] = useState("");
 const [deleteCatId, setDeleteCatId] = useState<string | null>(null);
+
+// 💡 NUEVO: Modal de edición de categoría
+const [editCatForm, setEditCatForm] = useState<{ id: string; name: string; image: string } | null>(null);
+const [savingCat, setSavingCat] = useState(false);
 
 const loadData = useCallback(async () => {
   setLoading(true);
@@ -256,23 +260,25 @@ const handleCreateCategory = async () => {
   }
 };
 
-const handleSaveCatEdit = async (id: string) => {
-  const name = editCatName.trim();
-  if (!name) return;
-  const res = await fetch(`/api/admin/categories/${id}`, {
+// 💡 NUEVO: Guardar edición de categoría (con imagen)
+const handleSaveCatEdit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!editCatForm) return;
+  setSavingCat(true);
+  const res = await fetch(`/api/admin/categories/${editCatForm.id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name }),
+    body: JSON.stringify({ name: editCatForm.name, image: editCatForm.image }),
   });
   if (res.ok) {
     const d = await res.json();
-    setCategories((prev) => prev.map((c) => c.id === id ? d.category : c));
-    setEditCatId(null);
-    setEditCatName("");
+    setCategories((prev) => prev.map((c) => c.id === editCatForm.id ? d.category : c));
+    setEditCatForm(null);
     toast.success("Categoría actualizada");
   } else {
     toast.error("Error al actualizar");
   }
+  setSavingCat(false);
 };
 
 const handleDeleteCat = async () => {
@@ -442,36 +448,26 @@ return (
           <div className="divide-y divide-noir-gray">
             {categories.map((cat) => (
               <div key={cat.id} className="px-4 py-3">
-                {editCatId === cat.id ? (
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      value={editCatName}
-                      onChange={(e) => setEditCatName(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") handleSaveCatEdit(cat.id);
-                        if (e.key === "Escape") { setEditCatId(null); setEditCatName(""); }
-                      }}
-                      className="flex-1 border border-noir-gray-2 px-2 py-1 text-xs outline-none focus:border-noir-black min-w-0"
-                      autoFocus
-                    />
-                    <button onClick={() => handleSaveCatEdit(cat.id)} className="text-green-600 hover:text-green-700"><Check size={13} /></button>
-                    <button onClick={() => { setEditCatId(null); setEditCatName(""); }} className="text-noir-gray-4 hover:text-noir-black"><X size={13} /></button>
-                  </div>
-                ) : (
                   <div className="flex items-center justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <button
-                        onClick={() => setFilterCat(filterCat === cat.name ? "all" : cat.name)}
-                        className="text-xs font-bold text-left truncate w-full hover:text-noir-gray-4 transition-colors flex items-center gap-1"
-                      >
-                        {filterCat === cat.name && <ChevronRight size={10} className="flex-shrink-0" />}
-                        {cat.name}
-                      </button>
-                      <p className="text-[9px] text-noir-gray-4 mt-0.5">{cat._count.products} producto{cat._count.products !== 1 ? "s" : ""} · /{cat.slug}</p>
+                    <div className="flex-1 min-w-0 flex items-center gap-2">
+                      {/* Muestra miniatura si tiene */}
+                      {cat.image && (
+                        <img src={cat.image} alt="" className="w-6 h-6 object-cover rounded-sm border border-noir-gray-2" />
+                      )}
+                      <div>
+                        <button
+                          onClick={() => setFilterCat(filterCat === cat.name ? "all" : cat.name)}
+                          className="text-xs font-bold text-left truncate w-full hover:text-noir-gray-4 transition-colors flex items-center gap-1"
+                        >
+                          {filterCat === cat.name && <ChevronRight size={10} className="flex-shrink-0" />}
+                          {cat.name}
+                        </button>
+                        <p className="text-[9px] text-noir-gray-4 mt-0.5">{cat._count.products} producto{cat._count.products !== 1 ? "s" : ""} · /{cat.slug}</p>
+                      </div>
                     </div>
                     <div className="flex items-center gap-1.5 flex-shrink-0">
-                      <button onClick={() => { setEditCatId(cat.id); setEditCatName(cat.name); }} className="text-noir-gray-4 hover:text-noir-black transition-colors" title="Editar">
+                      {/* 💡 AQUI ABRIMOS EL MODAL DE EDITAR CATEGORÍA */}
+                      <button onClick={() => setEditCatForm({ id: cat.id, name: cat.name, image: cat.image || "" })} className="text-noir-gray-4 hover:text-noir-black transition-colors" title="Editar">
                         <Edit size={11} />
                       </button>
                       <button onClick={() => setDeleteCatId(cat.id)} className="text-noir-gray-4 hover:text-red-600 transition-colors" title="Eliminar">
@@ -479,7 +475,6 @@ return (
                       </button>
                     </div>
                   </div>
-                )}
               </div>
             ))}
             {categories.length === 0 && !loading && (
@@ -500,15 +495,46 @@ return (
               onClick={handleCreateCategory}
               className="w-full flex items-center justify-center gap-1.5 bg-noir-black text-white py-2 text-[10px] font-black tracking-widest uppercase hover:bg-black transition-colors"
             >
-              <Plus size={11} /> CREAR CATEGORÍA
+              <Plus size={11} /> CREAR
             </button>
-            <p className="text-[9px] text-noir-gray-4 mt-2 leading-relaxed">
-              Al crear una categoría se añade al menú del header, footer y páginas de categoría.
-            </p>
           </div>
         </div>
       </div>
     </div>
+
+    {/* 💡 MODAL PARA EDITAR CATEGORÍA */}
+    {editCatForm && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="absolute inset-0 bg-noir-black/50" onClick={() => setEditCatForm(null)} />
+        <div className="relative bg-white w-full max-w-sm p-6">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-sm font-black uppercase">EDITAR CATEGORÍA</h2>
+            <button onClick={() => setEditCatForm(null)} className="text-noir-gray-4 hover:text-noir-black"><X size={18} /></button>
+          </div>
+          <form onSubmit={handleSaveCatEdit} className="space-y-4">
+            <div>
+              <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5">NOMBRE</label>
+              <input required type="text" value={editCatForm.name}
+                onChange={(e) => setEditCatForm({ ...editCatForm, name: e.target.value })}
+                className="w-full border border-noir-gray-2 px-4 py-2.5 text-sm outline-none focus:border-noir-black transition-colors" />
+            </div>
+            
+            <ImageUploader
+              single={true}
+              images={editCatForm.image ? [editCatForm.image] : []}
+              onChange={(urls) => setEditCatForm({ ...editCatForm, image: urls[0] || "" })}
+            />
+
+            <div className="flex gap-3 pt-2">
+              <button type="submit" disabled={savingCat} className="flex-1 flex justify-center items-center gap-2 bg-noir-black text-white px-4 py-3 text-xs font-bold tracking-widest uppercase hover:bg-black transition-colors disabled:opacity-60">
+                {savingCat ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />}
+                GUARDAR
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    )}
 
     {/* Edit modal */}
     {editProduct && editForm && (
@@ -572,7 +598,6 @@ return (
                 </select>
               </div>
               
-              {/* SWITCH DESTACADO EDITAR */}
               <div>
                 <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5">DESTACADO (HOME)</label>
                 <button
@@ -586,7 +611,6 @@ return (
               </div>
             </div>
 
-            {/* Image uploader */}
             <ImageUploader
               images={editForm.images}
               onChange={(urls) => setEditForm({ ...editForm, images: urls })}
@@ -693,7 +717,6 @@ return (
                 </select>
               </div>
               
-              {/* SWITCH DESTACADO CREAR */}
               <div>
                 <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5">DESTACADO (HOME)</label>
                 <button
