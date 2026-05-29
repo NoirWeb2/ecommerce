@@ -38,9 +38,16 @@ export default function AdminTopbar() {
         <Link href="/" target="_blank" className="flex items-center gap-1 hover:text-white transition-colors">
           <ExternalLink size={12} /> Ver tienda
         </Link>
-        <Link href="/admin/login" className="flex items-center gap-1 hover:text-white transition-colors">
-          <LogOut size={12} /> Salir
-        </Link>
+       <button
+  onClick={() => {
+    localStorage.removeItem("admin-auth");
+    sessionStorage.clear();
+    window.location.href = "/admin/login";
+  }}
+  className="flex items-center gap-1 hover:text-white transition-colors"
+>
+  <LogOut size={12} /> Salir
+</button>
       </div>
     </div>
   );
