@@ -33,7 +33,8 @@ const blankMeta = (url = ""): ImageMeta => ({ url, width: null, height: null, fi
 function useImageDimensions() {
   const getSize = useCallback((url: string): Promise<{ w: number; h: number }> => {
     return new Promise((res) => {
-      const img = new Image();
+      if (typeof window === "undefined") return res({ w: 0, h: 0 });
+const img = new window.Image();
       img.onload = () => res({ w: img.naturalWidth, h: img.naturalHeight });
       img.onerror = () => res({ w: 0, h: 0 });
       img.src = url;
