@@ -24,6 +24,7 @@ slug: string;
 price: number;
 comparePrice?: number | null;
 images?: string[];
+isFeatured?: boolean;
 }
 
 function ProductCard({ product }: { product: Product }) {
@@ -41,7 +42,6 @@ return (
         className="relative overflow-hidden bg-[#F2F2F2]"
         style={{ aspectRatio: "3/4" }}
       >
-        {/* Cambiado a <img> para evitar bloqueos de Cloudinary */}
         <img
           src={
             hovered
@@ -104,6 +104,10 @@ const [page, setPage] = useState(0);
 const max = Math.ceil(products.length / 5) - 1;
 const visible = products.slice(page * 5, page * 5 + 5);
 
+if (products.length === 0) {
+  return <p className="text-center text-xs text-noir-gray-4">No hay productos destacados aún.</p>;
+}
+
 return (
   <div className="relative px-5">
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 md:gap-[18px]">
@@ -140,7 +144,7 @@ pageData,
 }: {
 pageData: HomePageData;
 }) {
-const { heroBanner, collection1Banner } = pageData;
+const { heroBanner, collection1Banner, collection2Banner } = pageData;
 const [products, setProducts] = useState<Product[]>([]);
 
 useEffect(() => {
@@ -149,7 +153,13 @@ useEffect(() => {
       const res = await fetch("/api/products");
       if (!res.ok) return;
       const data = await res.json();
-      setProducts(data.products || []);
+      
+      const allProducts = data.products || [];
+      // Filtramos para mostrar SOLO los que tienen la estrellita (isFeatured)
+      const featuredProducts = allProducts.filter((p: Product) => p.isFeatured);
+      
+      // Si no has destacado ninguno, mostramos los más recientes por defecto
+      setProducts(featuredProducts.length > 0 ? featuredProducts : allProducts);
     } catch (error) {
       console.error(error);
     }
@@ -228,7 +238,7 @@ return (
         </p>
 
         <div className="space-y-6">
-          <ProductRow products={products.slice(0, 5)} />
+          <ProductRow products={products} />
         </div>
 
         <div className="text-center mt-10">
@@ -242,7 +252,7 @@ return (
       </div>
     </section>
 
-    {/* ── COLLECTION BANNER ── */}
+    {/* ── COLLECTION BANNER 1 ── */}
     {collection1Banner.visible !== false && (
       <section
         className="relative w-full overflow-hidden"
@@ -289,6 +299,58 @@ return (
             }`}
           >
             {collection1Banner.cta || "CONTINUAR"}
+          </Link>
+        </div>
+      </section>
+    )}
+
+    {/* ── COLLECTION BANNER 2 (EL QUE FALTABA) ── */}
+    {collection2Banner && collection2Banner.visible !== false && (
+      <section
+        className="relative w-full overflow-hidden"
+        style={{ height: "68vh", minHeight: 440 }}
+      >
+        <img
+          src={collection2Banner.image || "/banner-collection-2.webp"}
+          alt={collection2Banner.headline || "UNIQUE VIBE II"}
+          className="absolute inset-0 w-full h-full object-cover object-center"
+        />
+
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+
+        <div className="absolute bottom-0 left-0 right-0 flex flex-col items-center pb-12 text-center">
+          <p
+            className={`font-black uppercase leading-none tracking-tight drop-shadow-lg ${
+              collection2Banner.textColor === "black"
+                ? "text-black"
+                : "text-white"
+            }`}
+            style={{
+              fontSize: "clamp(34px, 6.5vw, 82px)",
+            }}
+          >
+            {collection2Banner.headline}
+          </p>
+
+          <p
+            className={`text-[10px] font-bold tracking-[0.4em] uppercase mt-1 mb-5 drop-shadow ${
+              collection2Banner.textColor === "black"
+                ? "text-black/70"
+                : "text-white/70"
+            }`}
+          >
+            {collection2Banner.subtext}
+          </p>
+
+          <Link
+            href={collection2Banner.ctaLink || "/tienda"}
+            className={`inline-block text-[10px] font-bold tracking-[0.2em] uppercase px-8 py-[10px] transition-colors ${
+              collection2Banner.textColor === "black"
+                ? "border border-black text-black hover:bg-black hover:text-white"
+                : "border border-white text-white hover:bg-white hover:text-noir-black"
+            }`}
+          >
+            {collection2Banner.cta || "VER MÁS"}
           </Link>
         </div>
       </section>
