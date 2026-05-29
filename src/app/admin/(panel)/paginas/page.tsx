@@ -8,15 +8,12 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-// ── Types ────────────────────────────────────────────────────────────────────
-
 interface ImageMeta { url: string; width: number | null; height: number | null; fileName: string }
 interface BannerBlock {
   id: string; label: string; image: ImageMeta; headline: string; subtext: string;
   cta: string; ctaLink: string; textColor: "black" | "white"; visible: boolean;
 }
 interface TextBlock { id: string; label: string; content: string }
-
 interface NavLink { label: string; href: string }
 interface HeaderConfig {
   logo: string; announcementText: string; announcementVisible: boolean;
@@ -27,12 +24,9 @@ interface FooterConfig {
   col1Links: NavLink[]; col2Links: NavLink[];
   socialInstagram: string; socialTikTok: string; socialWhatsApp: string;
 }
-
 interface CustomPage { id: string; slug: string; title: string; blocks: PageBlock[]; description?: string; featuredImage?: string; seoTitle?: string; seoDesc?: string; status?: "published" | "draft" }
 type BlockType = "heading" | "text" | "image" | "video" | "button" | "divider"
 interface PageBlock { id: string; type: BlockType; content: string; extra?: string }
-
-// ── Helpers ──────────────────────────────────────────────────────────────────
 
 const blankMeta = (url = ""): ImageMeta => ({ url, width: null, height: null, fileName: "" });
 
@@ -47,8 +41,6 @@ function useImageDimensions() {
   }, []);
   return getSize;
 }
-
-// ── Sub-component: ImageUploader ─────────────────────────────────────────────
 
 function ImageUploader({ value, onChange, label, folder = "noir-lovers/pages" }: {
   value: ImageMeta; onChange: (m: ImageMeta) => void; label: string; folder?: string;
@@ -86,7 +78,6 @@ function ImageUploader({ value, onChange, label, folder = "noir-lovers/pages" }:
   return (
     <div>
       <label className="block text-[10px] font-bold tracking-widest uppercase mb-2">{label}</label>
-      {/* Drop zone */}
       <div
         onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
         onDragLeave={() => setDragging(false)}
@@ -122,8 +113,6 @@ function ImageUploader({ value, onChange, label, folder = "noir-lovers/pages" }:
         <input ref={fileRef} type="file" accept="image/*" className="hidden"
           onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadToCloudinary(f); e.target.value = ""; }} />
       </div>
-
-      {/* Or URL */}
       <div className="mt-2 flex items-center gap-2">
         <span className="text-[10px] text-noir-gray-4">o URL:</span>
         <input type="text" placeholder="https://res.cloudinary.com/... o /imagen.jpg"
@@ -132,8 +121,6 @@ function ImageUploader({ value, onChange, label, folder = "noir-lovers/pages" }:
           onClick={(e) => e.stopPropagation()}
           className="flex-1 border border-noir-gray-2 px-3 py-1.5 text-xs outline-none focus:border-noir-black transition-colors" />
       </div>
-
-      {/* File info */}
       {value.url && !uploading && (
         <p className="text-[10px] text-noir-gray-4 mt-1.5 flex items-center gap-2">
           {value.fileName && <span className="font-mono truncate max-w-[140px]">{value.fileName}</span>}
@@ -151,8 +138,6 @@ function ImageUploader({ value, onChange, label, folder = "noir-lovers/pages" }:
     </div>
   );
 }
-
-// ── Initial data ──────────────────────────────────────────────────────────────
 
 const INIT_BANNERS: BannerBlock[] = [
   { id: "hero", label: "Hero principal", image: blankMeta("/hero-main.jpg"), headline: "VISTE LA OSCURIDAD.", subtext: "Nueva colección disponible", cta: "VER COLECCIÓN", ctaLink: "/tienda", textColor: "white", visible: true },
@@ -202,11 +187,7 @@ const INIT_FOOTER: FooterConfig = {
   socialWhatsApp: "https://wa.me/573000000000",
 };
 
-// ── Tab types ─────────────────────────────────────────────────────────────────
-
 type Tab = "banners" | "textos" | "filosofia" | "contacto" | "header" | "footer" | "paginas" | "seo";
-
-// ── SectionCard helper ────────────────────────────────────────────────────────
 
 function SectionCard({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   const [open, setOpen] = useState(true);
@@ -225,8 +206,6 @@ function SectionCard({ label, hint, children }: { label: string; hint?: string; 
   );
 }
 
-// ── Main component ────────────────────────────────────────────────────────────
-
 export default function PaginasPage() {
   const [tab, setTab] = useState<Tab>("banners");
   const [banners, setBanners] = useState<BannerBlock[]>(INIT_BANNERS);
@@ -236,27 +215,21 @@ export default function PaginasPage() {
   const [customPages, setCustomPages] = useState<CustomPage[]>([]);
   const [expanded, setExpanded] = useState<string | null>("hero");
 
-  // Páginas fijas — Filosofía (sección por sección)
   const [filosofia, setFilosofia] = useState({
     visible: true,
-    // Hero
     heroHeadline: "EL NEGRO\nLO ES TODO.",
     heroLocation: "BOGOTÁ, COLOMBIA",
     heroImage: blankMeta(),
-    // Intro
     introLabel: "NUESTRA POSTURA",
     introTitle: "No es un color. No es una tendencia.\nEs una forma de estar en el mundo.",
     introBody: "NOIR LOVERS nació en Bogotá para los hombres que entienden que el negro no necesita justificación. Una identidad construida desde adentro, traducida en cada corte, cada tela, cada detalle.",
-    // Split
     splitLabel: "IDENTIDAD",
     splitTitle: "CONSTRUIDO\nDESDE ADENTRO.",
     splitPara1: "Cada prenda tiene un propósito. No diseñamos para el trend. Diseñamos para el hombre que sabe exactamente quién es y no necesita explicarlo.",
     splitPara2: "Materiales premium, cortes colombianos, acabados que duran. Calidad sin excusas, desde las calles de Bogotá hacia el mundo.",
     splitImage: blankMeta(),
-    // Manifiesto
     manifestoQuote: '"El negro lo contiene todo. El silencio, la fuerza, la elegancia. No necesita nada más."',
     manifestoAuthor: "FUNDADORES DE NOIR LOVERS",
-    // Tres Pilares
     pilaresLabel: "LOS TRES PILARES",
     pilar1Title: "INTENCIÓN",
     pilar1Text: "Cada prenda tiene un propósito. Diseñamos para el hombre que sabe quién es, no para el que sigue tendencias.",
@@ -264,11 +237,9 @@ export default function PaginasPage() {
     pilar2Text: "Materiales premium, cortes colombianos, acabados que duran. Calidad sin excusas, desde Bogotá.",
     pilar3Title: "ACTITUD",
     pilar3Text: "NOIR LOVERS no es ropa. Es la forma en que entras a un cuarto. La presencia que no necesita explicación.",
-    // Banner "Viste la oscuridad"
     bannerLabel: "COLECCIÓN NOIR",
     bannerHeadline: "VISTE LA\nOSCURIDAD.",
     bannerImage: blankMeta(),
-    // CTA
     ctaLabel: "ÚNETE AL MOVIMIENTO",
     ctaTitle: "EMPIEZA CON\nEL NEGRO.",
     ctaBtn1Text: "VER COLECCIÓN",
@@ -276,6 +247,7 @@ export default function PaginasPage() {
     ctaBtn2Text: "NUESTRA HISTORIA",
     ctaBtn2Link: "/nosotros",
   });
+
   const [contacto, setContacto] = useState({
     email: "hola@noirlovers.co",
     whatsapp: "+57 300 000 0000",
@@ -285,65 +257,69 @@ export default function PaginasPage() {
     horario: "Lunes a Viernes 9am – 6pm",
     visible: true,
   });
+
   const [newPageOpen, setNewPageOpen] = useState(false);
   const [editPageId, setEditPageId] = useState<string | null>(null);
-
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Load saved data from DB on mount
+  // ── FIXED: Load saved data from DB ──────────────────────────────────────
   useEffect(() => {
     fetch("/api/admin/pages")
       .then((r) => r.json())
       .then(({ data }) => {
         if (!data) return;
 
-        // Restore banners
+        // Banners
         const bd = data.banners ?? {};
         if (bd.hero || bd.collection1 || bd.collection2) {
           setBanners((prev) => prev.map((b) => {
             const raw = bd[b.id];
             if (!raw) return b;
-            try { return { ...b, ...JSON.parse(raw) }; } catch { return b; }
+            try {
+              const parsed = JSON.parse(raw);
+              return { ...b, ...parsed, image: blankMeta(parsed.image ?? b.image.url) };
+            } catch { return b; }
           }));
         }
 
-        // Restore texts
+        // Texts
         const td = data.texts ?? {};
         if (Object.keys(td).length > 0) {
           setTexts((prev) => prev.map((t) => td[t.id] ? { ...t, content: td[t.id] } : t));
         }
 
-        // Restore filosofia
-        if (data.filosofia) {
+        // Filosofia — saved under section "pages", key "filosofia"
+        const filosofiaRaw = data.pages?.filosofia ?? data.filosofia?.data;
+        if (filosofiaRaw) {
           try {
-            const fRaw = data.filosofia.data;
-            if (fRaw) setFilosofia((prev) => ({ ...prev, ...JSON.parse(fRaw) }));
+            const parsed = JSON.parse(filosofiaRaw);
+            setFilosofia((prev) => ({
+              ...prev,
+              ...parsed,
+              heroImage: blankMeta(parsed.heroImage?.url ?? parsed.heroImage ?? ""),
+              splitImage: blankMeta(parsed.splitImage?.url ?? parsed.splitImage ?? ""),
+              bannerImage: blankMeta(parsed.bannerImage?.url ?? parsed.bannerImage ?? ""),
+            }));
           } catch { /* keep defaults */ }
         }
 
-        // Restore contacto
-        if (data.contacto) {
-          try {
-            const cRaw = data.contacto.data;
-            if (cRaw) setContacto((prev) => ({ ...prev, ...JSON.parse(cRaw) }));
-          } catch { /* keep defaults */ }
+        // Contacto — saved under section "pages", key "contacto"
+        const contactoRaw = data.pages?.contacto ?? data.contacto?.data;
+        if (contactoRaw) {
+          try { setContacto((prev) => ({ ...prev, ...JSON.parse(contactoRaw) })); } catch { /* keep defaults */ }
         }
 
-        // Restore header
-        if (data.header) {
-          try {
-            const hRaw = data.header.data;
-            if (hRaw) setHeader((prev) => ({ ...prev, ...JSON.parse(hRaw) }));
-          } catch { /* keep defaults */ }
+        // Header
+        const headerRaw = data.header?.data;
+        if (headerRaw) {
+          try { setHeader((prev) => ({ ...prev, ...JSON.parse(headerRaw) })); } catch { /* keep defaults */ }
         }
 
-        // Restore footer
-        if (data.footer) {
-          try {
-            const fRaw = data.footer.data;
-            if (fRaw) setFooter((prev) => ({ ...prev, ...JSON.parse(fRaw) }));
-          } catch { /* keep defaults */ }
+        // Footer — saved under section "layout", key "footer"
+        const footerRaw = data.layout?.footer ?? data.footer?.data;
+        if (footerRaw) {
+          try { setFooter((prev) => ({ ...prev, ...JSON.parse(footerRaw) })); } catch { /* keep defaults */ }
         }
       })
       .catch(() => { /* use defaults */ })
@@ -355,13 +331,13 @@ export default function PaginasPage() {
   const updateText = (id: string, content: string) =>
     setTexts((prev) => prev.map((t) => (t.id === id ? { ...t, content } : t)));
 
+  // ── FIXED: handleSave uses correct section/key per data type ────────────
   const handleSave = async (section = "Cambios") => {
     setSaving(true);
     try {
       let body: { section: string; data: Record<string, string> } | null = null;
 
       if (section === "Banner" || section === "Cambios") {
-        // Save all banners as JSON strings keyed by banner id
         const bannerData: Record<string, string> = {};
         for (const b of banners) {
           bannerData[b.id] = JSON.stringify({
@@ -380,13 +356,20 @@ export default function PaginasPage() {
         for (const t of texts) textData[t.id] = t.content;
         body = { section: "texts", data: textData };
       } else if (section === "Filosofía") {
-        body = { section: "filosofia", data: { data: JSON.stringify(filosofia) } };
+        // Serialize images as URL strings for storage
+        const toSave = {
+          ...filosofia,
+          heroImage: filosofia.heroImage.url,
+          splitImage: filosofia.splitImage.url,
+          bannerImage: filosofia.bannerImage.url,
+        };
+        body = { section: "pages", data: { filosofia: JSON.stringify(toSave) } };
       } else if (section === "Contacto") {
-        body = { section: "contacto", data: { data: JSON.stringify(contacto) } };
+        body = { section: "pages", data: { contacto: JSON.stringify(contacto) } };
       } else if (section === "Header") {
         body = { section: "header", data: { data: JSON.stringify(header) } };
       } else if (section === "Footer") {
-        body = { section: "footer", data: { data: JSON.stringify(footer) } };
+        body = { section: "layout", data: { footer: JSON.stringify(footer) } };
       } else if (section === "SEO") {
         body = { section: "seo", data: { data: "saved" } };
       }
@@ -423,7 +406,6 @@ export default function PaginasPage() {
 
   return (
     <div>
-      {/* Topbar */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-black uppercase">PÁGINAS</h1>
         <div className="flex gap-2">
@@ -438,7 +420,6 @@ export default function PaginasPage() {
         </div>
       </div>
 
-      {/* Tab nav — scrollable on small screens */}
       <div className="flex gap-0 mb-6 border-b border-noir-gray-2 overflow-x-auto">
         {TABS.map((t) => (
           <button key={t.key} onClick={() => setTab(t.key)}
@@ -450,12 +431,11 @@ export default function PaginasPage() {
         ))}
       </div>
 
-      {/* ══ BANNERS tab ══ */}
+      {/* ══ BANNERS ══ */}
       {tab === "banners" && (
         <div className="space-y-3">
           {banners.map((b) => (
             <div key={b.id} className="bg-white border border-noir-gray-2 overflow-hidden">
-              {/* Row toggle */}
               <button onClick={() => setExpanded(expanded === b.id ? null : b.id)}
                 className="w-full flex items-center justify-between p-4 hover:bg-noir-gray/30 transition-colors">
                 <div className="flex items-center gap-3">
@@ -478,12 +458,7 @@ export default function PaginasPage() {
 
               {expanded === b.id && (
                 <div className="border-t border-noir-gray-2 p-5 space-y-5">
-                  {/* Image upload */}
-                  <ImageUploader label="IMAGEN DEL BANNER"
-                    value={b.image}
-                    onChange={(m) => updateBanner(b.id, { image: m })} />
-
-                  {/* Text color */}
+                  <ImageUploader label="IMAGEN DEL BANNER" value={b.image} onChange={(m) => updateBanner(b.id, { image: m })} />
                   <div>
                     <label className="block text-[10px] font-bold tracking-widest uppercase mb-2">COLOR DEL TEXTO SOBRE LA IMAGEN</label>
                     <div className="flex gap-2 max-w-xs">
@@ -494,51 +469,44 @@ export default function PaginasPage() {
                               ? color === "white" ? "bg-noir-black text-white border-noir-black" : "bg-white text-noir-black border-noir-black"
                               : "border-noir-gray-2 hover:border-noir-black"
                           }`}>
-                          {color === "white" ? "⬜ Blanco" : "⬛ Negro"}
+                          {color === "white" ? "⬜ BLANCO" : "⬛ NEGRO"}
                         </button>
                       ))}
                     </div>
                   </div>
-
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5">TITULAR</label>
-                      <input type="text" value={b.headline}
-                        onChange={(e) => updateBanner(b.id, { headline: e.target.value })}
+                      <input type="text" value={b.headline} onChange={(e) => updateBanner(b.id, { headline: e.target.value })}
                         className="w-full border border-noir-gray-2 px-3 py-2.5 text-sm outline-none focus:border-noir-black transition-colors" />
                     </div>
                     <div>
                       <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5">SUBTEXTO</label>
-                      <input type="text" value={b.subtext}
-                        onChange={(e) => updateBanner(b.id, { subtext: e.target.value })}
+                      <input type="text" value={b.subtext} onChange={(e) => updateBanner(b.id, { subtext: e.target.value })}
                         className="w-full border border-noir-gray-2 px-3 py-2.5 text-sm outline-none focus:border-noir-black transition-colors" />
                     </div>
                     <div>
                       <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5">TEXTO BOTÓN</label>
-                      <input type="text" value={b.cta}
-                        onChange={(e) => updateBanner(b.id, { cta: e.target.value })}
+                      <input type="text" value={b.cta} onChange={(e) => updateBanner(b.id, { cta: e.target.value })}
                         className="w-full border border-noir-gray-2 px-3 py-2.5 text-sm outline-none focus:border-noir-black transition-colors" />
                     </div>
                     <div>
                       <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5">ENLACE BOTÓN</label>
-                      <input type="text" value={b.ctaLink}
-                        onChange={(e) => updateBanner(b.id, { ctaLink: e.target.value })}
+                      <input type="text" value={b.ctaLink} onChange={(e) => updateBanner(b.id, { ctaLink: e.target.value })}
                         className="w-full border border-noir-gray-2 px-3 py-2.5 text-sm outline-none focus:border-noir-black transition-colors" />
                     </div>
                   </div>
-
-                  {/* Preview */}
-                  <div className="border border-noir-gray-2 overflow-hidden">
-                    <p className="text-[10px] font-bold tracking-widest uppercase px-3 py-2 bg-noir-gray border-b border-noir-gray-2">VISTA PREVIA</p>
-                    <div className="relative h-28 bg-cover bg-center flex items-end p-4"
-                      style={{ backgroundImage: `url(${b.image.url})` }}>
-                      <div className={b.textColor === "white" ? "text-white" : "text-noir-black"}>
-                        <p className="text-xs font-black uppercase">{b.headline}</p>
-                        <p className="text-[10px] opacity-70">{b.subtext}</p>
+                  {b.image.url && (
+                    <div className="border border-noir-gray-2 overflow-hidden">
+                      <p className="text-[10px] font-bold tracking-widest uppercase px-3 py-2 bg-noir-gray border-b border-noir-gray-2">VISTA PREVIA</p>
+                      <div className="relative h-28 bg-cover bg-center flex items-end p-4" style={{ backgroundImage: `url(${b.image.url})` }}>
+                        <div className={b.textColor === "white" ? "text-white" : "text-noir-black"}>
+                          <p className="text-xs font-black uppercase">{b.headline}</p>
+                          <p className="text-[10px] opacity-70">{b.subtext}</p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-
+                  )}
                   <button onClick={() => handleSave("Banner")} disabled={saving}
                     className="flex items-center gap-2 bg-noir-black text-white px-6 py-2.5 text-xs font-bold tracking-widest uppercase hover:bg-black transition-colors disabled:opacity-60">
                     {saving ? <Loader2 size={12} className="animate-spin" /> : <Save size={12} />} GUARDAR BANNER
@@ -550,7 +518,7 @@ export default function PaginasPage() {
         </div>
       )}
 
-      {/* ══ TEXTOS tab ══ */}
+      {/* ══ TEXTOS ══ */}
       {tab === "textos" && (
         <div className="space-y-4">
           {texts.map((t) => (
@@ -568,10 +536,9 @@ export default function PaginasPage() {
         </div>
       )}
 
-      {/* ══ FILOSOFÍA tab ══ */}
+      {/* ══ FILOSOFÍA ══ */}
       {tab === "filosofia" && (
         <div className="space-y-4">
-          {/* Page header */}
           <div className="flex items-center justify-between pb-3 border-b border-noir-gray-2">
             <div>
               <h2 className="text-xs font-black uppercase tracking-widest">Página Filosofía <span className="font-mono text-noir-gray-4 normal-case font-normal">/filosofia</span></h2>
@@ -589,7 +556,6 @@ export default function PaginasPage() {
             </div>
           </div>
 
-          {/* ── 1. HERO ── */}
           <SectionCard label="1 — HERO" hint="Banner de pantalla completa al entrar a /filosofia">
             <ImageUploader label="IMAGEN DE FONDO DEL HERO" value={filosofia.heroImage} onChange={m => setFilosofia(f => ({ ...f, heroImage: m }))} />
             <div className="grid sm:grid-cols-2 gap-4 mt-4">
@@ -606,7 +572,6 @@ export default function PaginasPage() {
             </div>
           </SectionCard>
 
-          {/* ── 2. INTRO ── */}
           <SectionCard label="2 — INTRO" hint="Sección de texto centrado debajo del hero">
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
@@ -627,7 +592,6 @@ export default function PaginasPage() {
             </div>
           </SectionCard>
 
-          {/* ── 3. SPLIT IMAGEN + TEXTO ── */}
           <SectionCard label="3 — IMAGEN + TEXTO (IDENTIDAD)" hint="Sección de dos columnas: foto izquierda, texto derecha">
             <div className="grid sm:grid-cols-2 gap-6">
               <ImageUploader label="FOTO LATERAL" value={filosofia.splitImage} onChange={m => setFilosofia(f => ({ ...f, splitImage: m }))} />
@@ -656,7 +620,6 @@ export default function PaginasPage() {
             </div>
           </SectionCard>
 
-          {/* ── 4. MANIFIESTO ── */}
           <SectionCard label="4 — MANIFIESTO" hint="Sección negra con cita grande centrada">
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
@@ -672,7 +635,6 @@ export default function PaginasPage() {
             </div>
           </SectionCard>
 
-          {/* ── 5. TRES PILARES ── */}
           <SectionCard label="5 — LOS TRES PILARES" hint="Grid de 3 columnas con número, título y texto">
             <div className="mb-4">
               <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5 text-noir-gray-4">ETIQUETA DE SECCIÓN</label>
@@ -696,7 +658,6 @@ export default function PaginasPage() {
             </div>
           </SectionCard>
 
-          {/* ── 6. BANNER "VISTE LA OSCURIDAD" ── */}
           <SectionCard label='6 — BANNER "VISTE LA OSCURIDAD"' hint="Banner ancho con imagen de fondo y texto superpuesto">
             <div className="grid sm:grid-cols-2 gap-6">
               <ImageUploader label="IMAGEN DE FONDO" value={filosofia.bannerImage} onChange={m => setFilosofia(f => ({ ...f, bannerImage: m }))} />
@@ -715,7 +676,6 @@ export default function PaginasPage() {
             </div>
           </SectionCard>
 
-          {/* ── 7. CTA ── */}
           <SectionCard label="7 — CTA FINAL" hint='Sección blanca "Empieza con el negro" con dos botones'>
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
@@ -758,7 +718,7 @@ export default function PaginasPage() {
         </div>
       )}
 
-      {/* ══ CONTACTO tab ══ */}
+      {/* ══ CONTACTO ══ */}
       {tab === "contacto" && (
         <div className="space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-noir-gray-2">
@@ -769,11 +729,6 @@ export default function PaginasPage() {
               <a href="/contacto" target="_blank" className="text-[10px] font-bold uppercase tracking-widest text-noir-gray-4 hover:text-noir-black flex items-center gap-1 border border-noir-gray-2 px-3 py-1.5 hover:border-noir-black transition-colors">
                 <Eye size={11} /> VER PÁGINA
               </a>
-              <button onClick={() => setContacto(c => ({ ...c, visible: !c.visible }))}
-                className={`flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 border transition-colors ${contacto.visible ? "bg-green-50 border-green-300 text-green-700" : "border-noir-gray-2 text-noir-gray-4"}`}>
-                {contacto.visible ? <ToggleRight size={13} /> : <ToggleLeft size={13} />}
-                {contacto.visible ? "Visible" : "Oculta"}
-              </button>
             </div>
           </div>
           <div className="bg-white border border-noir-gray-2 p-6">
@@ -801,16 +756,13 @@ export default function PaginasPage() {
         </div>
       )}
 
-      {/* ══ HEADER tab ══ */}
+      {/* ══ HEADER ══ */}
       {tab === "header" && (
         <div className="space-y-5">
           <div className="bg-white border border-noir-gray-2 p-5 space-y-5">
             <h2 className="text-xs font-black uppercase tracking-widest border-b border-noir-gray-2 pb-3">LOGOTIPO</h2>
-            <ImageUploader label="IMAGEN DEL LOGO"
-              value={blankMeta(header.logo)}
-              onChange={(m) => setHeader({ ...header, logo: m.url })} />
+            <ImageUploader label="IMAGEN DEL LOGO" value={blankMeta(header.logo)} onChange={(m) => setHeader({ ...header, logo: m.url })} />
           </div>
-
           <div className="bg-white border border-noir-gray-2 p-5 space-y-4">
             <div className="flex items-center justify-between border-b border-noir-gray-2 pb-3">
               <h2 className="text-xs font-black uppercase tracking-widest">BARRA DE ANUNCIO</h2>
@@ -822,12 +774,10 @@ export default function PaginasPage() {
             </div>
             <div>
               <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5">TEXTO</label>
-              <input type="text" value={header.announcementText}
-                onChange={(e) => setHeader({ ...header, announcementText: e.target.value })}
+              <input type="text" value={header.announcementText} onChange={(e) => setHeader({ ...header, announcementText: e.target.value })}
                 className="w-full border border-noir-gray-2 px-3 py-2.5 text-sm outline-none focus:border-noir-black transition-colors" />
             </div>
           </div>
-
           <div className="bg-white border border-noir-gray-2 p-5 space-y-4">
             <h2 className="text-xs font-black uppercase tracking-widest border-b border-noir-gray-2 pb-3">LINKS DE NAVEGACIÓN</h2>
             <div className="space-y-2">
@@ -852,7 +802,6 @@ export default function PaginasPage() {
               </button>
             </div>
           </div>
-
           <button onClick={() => handleSave("Header")}
             className="flex items-center gap-2 bg-noir-black text-white px-8 py-3 text-xs font-bold tracking-widest uppercase hover:bg-black transition-colors">
             <Save size={13} /> GUARDAR HEADER
@@ -860,42 +809,35 @@ export default function PaginasPage() {
         </div>
       )}
 
-      {/* ══ FOOTER tab ══ */}
+      {/* ══ FOOTER ══ */}
       {tab === "footer" && (
         <div className="space-y-5">
           <div className="bg-white border border-noir-gray-2 p-5 space-y-4">
             <h2 className="text-xs font-black uppercase tracking-widest border-b border-noir-gray-2 pb-3">GENERAL</h2>
             <div>
               <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5">TAGLINE</label>
-              <input type="text" value={footer.tagline}
-                onChange={(e) => setFooter({ ...footer, tagline: e.target.value })}
+              <input type="text" value={footer.tagline} onChange={(e) => setFooter({ ...footer, tagline: e.target.value })}
                 className="w-full border border-noir-gray-2 px-3 py-2.5 text-sm outline-none focus:border-noir-black transition-colors" />
             </div>
             <div className="grid grid-cols-3 gap-4">
-              {[
+              {([
                 { label: "Instagram", key: "socialInstagram" as const },
                 { label: "TikTok", key: "socialTikTok" as const },
                 { label: "WhatsApp", key: "socialWhatsApp" as const },
-              ].map((s) => (
+              ]).map((s) => (
                 <div key={s.key}>
-                  <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5">{s.label}</label>
-                  <input type="text" value={footer[s.key]}
-                    onChange={(e) => setFooter({ ...footer, [s.key]: e.target.value })}
+                  <label className="block text-[10px] font-bold tracking-widests uppercase mb-1.5">{s.label}</label>
+                  <input type="text" value={footer[s.key]} onChange={(e) => setFooter({ ...footer, [s.key]: e.target.value })}
                     className="w-full border border-noir-gray-2 px-3 py-2 text-xs outline-none focus:border-noir-black transition-colors" />
                 </div>
               ))}
             </div>
           </div>
-
-          {([
-            { title: "col1Title", links: "col1Links" },
-            { title: "col2Title", links: "col2Links" },
-          ] as const).map((col, ci) => (
+          {([{ title: "col1Title", links: "col1Links" }, { title: "col2Title", links: "col2Links" }] as const).map((col, ci) => (
             <div key={ci} className="bg-white border border-noir-gray-2 p-5 space-y-3">
               <div>
                 <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5">TÍTULO DE COLUMNA {ci + 1}</label>
-                <input type="text" value={footer[col.title]}
-                  onChange={(e) => setFooter({ ...footer, [col.title]: e.target.value })}
+                <input type="text" value={footer[col.title]} onChange={(e) => setFooter({ ...footer, [col.title]: e.target.value })}
                   className="w-full max-w-xs border border-noir-gray-2 px-3 py-2 text-sm outline-none focus:border-noir-black transition-colors" />
               </div>
               <p className="text-[10px] font-bold tracking-widest uppercase text-noir-gray-4">LINKS</p>
@@ -922,7 +864,6 @@ export default function PaginasPage() {
               </div>
             </div>
           ))}
-
           <button onClick={() => handleSave("Footer")}
             className="flex items-center gap-2 bg-noir-black text-white px-8 py-3 text-xs font-bold tracking-widest uppercase hover:bg-black transition-colors">
             <Save size={13} /> GUARDAR FOOTER
@@ -930,7 +871,7 @@ export default function PaginasPage() {
         </div>
       )}
 
-      {/* ══ PÁGINAS PERSONALIZADAS tab ══ */}
+      {/* ══ PÁGINAS PERSONALIZADAS ══ */}
       {tab === "paginas" && !editPageId && (
         <div>
           <div className="flex items-center justify-between mb-4">
@@ -940,7 +881,6 @@ export default function PaginasPage() {
               <Plus size={13} /> NUEVA PÁGINA
             </button>
           </div>
-
           {customPages.length === 0 ? (
             <div className="bg-white border border-noir-gray-2 p-12 text-center">
               <Globe size={32} className="text-noir-gray-3 mx-auto mb-3" />
@@ -955,16 +895,10 @@ export default function PaginasPage() {
                     <p className="text-xs text-noir-gray-4 font-mono">/{p.slug}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <a href={`/${p.slug}`} target="_blank"
-                      className="text-noir-gray-4 hover:text-noir-black transition-colors"><Eye size={14} /></a>
-                    <button onClick={() => setEditPageId(p.id)}
-                      className="text-noir-gray-4 hover:text-noir-black transition-colors">
-                      <Edit size={14} />
-                    </button>
+                    <a href={`/${p.slug}`} target="_blank" className="text-noir-gray-4 hover:text-noir-black transition-colors"><Eye size={14} /></a>
+                    <button onClick={() => setEditPageId(p.id)} className="text-noir-gray-4 hover:text-noir-black transition-colors"><Edit size={14} /></button>
                     <button onClick={() => { setCustomPages((prev) => prev.filter((x) => x.id !== p.id)); toast.success("Página eliminada"); }}
-                      className="text-noir-gray-4 hover:text-red-500 transition-colors">
-                      <Trash2 size={14} />
-                    </button>
+                      className="text-noir-gray-4 hover:text-red-500 transition-colors"><Trash2 size={14} /></button>
                   </div>
                 </div>
               ))}
@@ -973,7 +907,6 @@ export default function PaginasPage() {
         </div>
       )}
 
-      {/* ══ Page block editor ══ */}
       {tab === "paginas" && editingPage && (
         <PageBlockEditor
           page={editingPage}
@@ -986,7 +919,7 @@ export default function PaginasPage() {
         />
       )}
 
-      {/* ══ SEO tab ══ */}
+      {/* ══ SEO ══ */}
       {tab === "seo" && (
         <div className="space-y-4">
           {[
@@ -1003,8 +936,7 @@ export default function PaginasPage() {
                 {s.fields.map((f) => (
                   <div key={f} className="grid grid-cols-3 gap-4 items-center">
                     <label className="text-xs font-medium text-noir-gray-4">{f}</label>
-                    <input type="text"
-                      className="col-span-2 border border-noir-gray-2 px-3 py-2 text-sm outline-none focus:border-noir-black transition-colors" />
+                    <input type="text" className="col-span-2 border border-noir-gray-2 px-3 py-2 text-sm outline-none focus:border-noir-black transition-colors" />
                   </div>
                 ))}
               </div>
@@ -1017,14 +949,9 @@ export default function PaginasPage() {
         </div>
       )}
 
-      {/* ══ New page modal ══ */}
       {newPageOpen && (
         <NewPageModal
-          onCreate={(p) => {
-            setCustomPages((prev) => [...prev, p]);
-            setNewPageOpen(false);
-            setEditPageId(p.id);
-          }}
+          onCreate={(p) => { setCustomPages((prev) => [...prev, p]); setNewPageOpen(false); setEditPageId(p.id); }}
           onClose={() => setNewPageOpen(false)}
         />
       )}
@@ -1032,83 +959,50 @@ export default function PaginasPage() {
   );
 }
 
-// ── NewPageModal: removed — now opens directly as PageBlockEditor ─────────────
-// (kept as alias for compat)
-function NewPageModal({ onCreate, onClose }: {
-  onCreate: (p: CustomPage) => void; onClose: () => void;
-}) {
+function NewPageModal({ onCreate, onClose }: { onCreate: (p: CustomPage) => void; onClose: () => void }) {
   const empty: CustomPage = { id: Date.now().toString(), slug: "", title: "", blocks: [], status: "draft" };
-  return (
-    <PageBlockEditor
-      page={empty}
-      isNew
-      onSave={(p) => { onCreate(p as CustomPage); }}
-      onBack={onClose}
-    />
-  );
+  return <PageBlockEditor page={empty} isNew onSave={(p) => { onCreate(p as CustomPage); }} onBack={onClose} />;
 }
 
-// ── PageBlockEditor — full WordPress-style editor ─────────────────────────────
-
 interface ExtendedPage extends CustomPage {
-  description?: string;
-  featuredImage?: string;
-  seoTitle?: string;
-  seoDesc?: string;
-  status?: "published" | "draft";
+  description?: string; featuredImage?: string; seoTitle?: string; seoDesc?: string; status?: "published" | "draft";
 }
 
 const BLOCK_TYPES_DEF: { type: BlockType; label: string; desc: string; icon: React.ReactNode }[] = [
-  { type: "heading",  label: "Título",      desc: "H2 o H3 de sección",         icon: <span className="font-black text-base">H</span> },
-  { type: "text",     label: "Párrafo",     desc: "Bloque de texto libre",       icon: <span className="font-bold text-sm">¶</span> },
-  { type: "image",    label: "Imagen",      desc: "Sube una foto o video corto", icon: <ImageIcon size={15} /> },
-  { type: "video",    label: "Video",       desc: "URL de YouTube o Vimeo",      icon: <span className="font-bold text-sm">▶</span> },
-  { type: "button",   label: "Botón CTA",   desc: "Llamada a la acción",         icon: <span className="font-bold text-xs">[ ]</span> },
-  { type: "divider",  label: "Divisor",     desc: "Línea separadora",            icon: <span className="font-bold text-sm">—</span> },
+  { type: "heading", label: "Título", desc: "H2 o H3 de sección", icon: <span className="font-black text-base">H</span> },
+  { type: "text", label: "Párrafo", desc: "Bloque de texto libre", icon: <span className="font-bold text-sm">¶</span> },
+  { type: "image", label: "Imagen", desc: "Sube una foto o video corto", icon: <ImageIcon size={15} /> },
+  { type: "video", label: "Video", desc: "URL de YouTube o Vimeo", icon: <span className="font-bold text-sm">▶</span> },
+  { type: "button", label: "Botón CTA", desc: "Llamada a la acción", icon: <span className="font-bold text-xs">[ ]</span> },
+  { type: "divider", label: "Divisor", desc: "Línea separadora", icon: <span className="font-bold text-sm">—</span> },
 ];
 
 function PageBlockEditor({ page, isNew = false, onSave, onBack }: {
-  page: CustomPage | ExtendedPage;
-  isNew?: boolean;
-  onSave: (p: ExtendedPage) => void;
-  onBack: () => void;
+  page: CustomPage | ExtendedPage; isNew?: boolean;
+  onSave: (p: ExtendedPage) => void; onBack: () => void;
 }) {
   const ext = page as ExtendedPage;
-  const [title, setTitle]           = useState(ext.title || "");
-  const [slug, setSlug]             = useState(ext.slug || "");
-  const [description, setDesc]      = useState(ext.description || "");
+  const [title, setTitle] = useState(ext.title || "");
+  const [slug, setSlug] = useState(ext.slug || "");
+  const [description, setDesc] = useState(ext.description || "");
   const [featuredImage, setFeatImg] = useState(ext.featuredImage || "");
-  const [seoTitle, setSeoTitle]     = useState(ext.seoTitle || "");
-  const [seoDesc, setSeoDesc]       = useState(ext.seoDesc || "");
-  const [status, setStatus]         = useState<"published" | "draft">(ext.status ?? (isNew ? "draft" : "published"));
-  const [blocks, setBlocks]         = useState<PageBlock[]>(page.blocks || []);
+  const [seoTitle, setSeoTitle] = useState(ext.seoTitle || "");
+  const [seoDesc, setSeoDesc] = useState(ext.seoDesc || "");
+  const [status, setStatus] = useState<"published" | "draft">(ext.status ?? (isNew ? "draft" : "published"));
+  const [blocks, setBlocks] = useState<PageBlock[]>(page.blocks || []);
   const [showBlockPicker, setShowBlockPicker] = useState(false);
-  const [showSeo, setShowSeo]       = useState(false);
+  const [showSeo, setShowSeo] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
-
-  const fileRef           = useRef<HTMLInputElement>(null);
-  const featImgRef        = useRef<HTMLInputElement>(null);
-  const [uploadTargetId, setUploadTargetId] = useState<string | null>(null);
-  const getSize           = useImageDimensions();
+  const featImgRef = useRef<HTMLInputElement>(null);
+  const getSize = useImageDimensions();
 
   const autoSlug = (t: string) =>
     t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
-  const handleTitleChange = (v: string) => {
-    setTitle(v);
-    if (isNew) setSlug(autoSlug(v));
-  };
-
-  const addBlock = (type: BlockType) => {
-    setBlocks((prev) => [...prev, { id: Date.now().toString(), type, content: "", extra: "" }]);
-    setShowBlockPicker(false);
-  };
-
-  const updateBlock = (id: string, patch: Partial<PageBlock>) =>
-    setBlocks((prev) => prev.map((b) => (b.id === id ? { ...b, ...patch } : b)));
-
+  const handleTitleChange = (v: string) => { setTitle(v); if (isNew) setSlug(autoSlug(v)); };
+  const addBlock = (type: BlockType) => { setBlocks((prev) => [...prev, { id: Date.now().toString(), type, content: "", extra: "" }]); setShowBlockPicker(false); };
+  const updateBlock = (id: string, patch: Partial<PageBlock>) => setBlocks((prev) => prev.map((b) => (b.id === id ? { ...b, ...patch } : b)));
   const removeBlock = (id: string) => setBlocks((prev) => prev.filter((b) => b.id !== id));
-
   const moveBlock = (id: string, dir: "up" | "down") => {
     setBlocks((prev) => {
       const idx = prev.findIndex((b) => b.id === id);
@@ -1127,76 +1021,45 @@ function PageBlockEditor({ page, isNew = false, onSave, onBack }: {
     updateBlock(blockId, { content: url, extra: `${w}×${h}px — ${file.name}` });
   };
 
-  const handleBlockVideoFile = async (file: File, blockId: string) => {
-    const url = URL.createObjectURL(file);
-    updateBlock(blockId, { content: url, extra: `${file.name} (${(file.size / 1024 / 1024).toFixed(1)} MB)` });
-  };
-
-  const handleFeaturedImageFile = async (file: File) => {
-    const url = URL.createObjectURL(file);
-    setFeatImg(url);
-  };
-
   const handleSave = (publishStatus?: "published" | "draft") => {
     if (!title.trim()) { toast.error("El título es requerido"); return; }
     if (!slug.trim()) { toast.error("El slug (URL) es requerido"); return; }
-    onSave({
-      id: page.id || Date.now().toString(),
-      title, slug, blocks, description,
-      featuredImage, seoTitle, seoDesc,
-      status: publishStatus ?? status,
-    });
+    onSave({ id: page.id || Date.now().toString(), title, slug, blocks, description, featuredImage, seoTitle, seoDesc, status: publishStatus ?? status });
     toast.success(publishStatus === "published" ? "Página publicada" : "Borrador guardado");
   };
 
   return (
     <div className="fixed inset-0 z-[60] bg-[#f0f0f0] flex flex-col overflow-hidden">
-      {/* Top bar */}
       <div className="bg-white border-b border-noir-gray-2 px-5 py-3 flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-3">
           <button onClick={onBack} className="flex items-center gap-1.5 text-xs font-bold text-noir-gray-4 hover:text-noir-black transition-colors tracking-widest uppercase">
             <X size={14} /> CERRAR
           </button>
           <span className="text-noir-gray-2">|</span>
-          <span className="text-[10px] font-bold tracking-widest uppercase text-noir-gray-4">
-            {isNew ? "NUEVA PÁGINA" : "EDITAR PÁGINA"}
-          </span>
+          <span className="text-[10px] font-bold tracking-widest uppercase text-noir-gray-4">{isNew ? "NUEVA PÁGINA" : "EDITAR PÁGINA"}</span>
           <span className={`text-[9px] font-bold px-2 py-0.5 rounded ${status === "published" ? "bg-green-50 text-green-700 border border-green-200" : "bg-amber-50 text-amber-700 border border-amber-200"}`}>
             {status === "published" ? "Publicada" : "Borrador"}
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setPreviewMode((v) => !v)}
-            className={`flex items-center gap-1.5 border px-4 py-2 text-[10px] font-bold tracking-widest uppercase transition-colors ${previewMode ? "border-noir-black bg-noir-black text-white" : "border-noir-gray-2 hover:border-noir-black"}`}
-          >
+          <button onClick={() => setPreviewMode((v) => !v)}
+            className={`flex items-center gap-1.5 border px-4 py-2 text-[10px] font-bold tracking-widest uppercase transition-colors ${previewMode ? "border-noir-black bg-noir-black text-white" : "border-noir-gray-2 hover:border-noir-black"}`}>
             <Eye size={12} /> {previewMode ? "EDITOR" : "VISTA PREVIA"}
           </button>
-          <button
-            onClick={() => handleSave("draft")}
-            className="border border-noir-gray-2 px-4 py-2 text-[10px] font-bold tracking-widest uppercase hover:border-noir-black transition-colors"
-          >
+          <button onClick={() => handleSave("draft")} className="border border-noir-gray-2 px-4 py-2 text-[10px] font-bold tracking-widest uppercase hover:border-noir-black transition-colors">
             GUARDAR BORRADOR
           </button>
-          <button
-            onClick={() => handleSave("published")}
-            className="bg-noir-black text-white px-5 py-2 text-[10px] font-bold tracking-widest uppercase hover:bg-black transition-colors flex items-center gap-1.5"
-          >
+          <button onClick={() => handleSave("published")} className="bg-noir-black text-white px-5 py-2 text-[10px] font-bold tracking-widest uppercase hover:bg-black transition-colors flex items-center gap-1.5">
             <Check size={12} /> PUBLICAR
           </button>
         </div>
       </div>
 
-      {/* Main layout */}
       <div className="flex-1 overflow-hidden flex">
-        {/* Editor area */}
         <div className="flex-1 overflow-y-auto">
           {previewMode ? (
-            /* ── Preview mode ── */
             <div className="max-w-2xl mx-auto py-12 px-6">
-              {featuredImage && (
-                <img src={featuredImage} alt="Featured" className="w-full max-h-64 object-cover mb-8" />
-              )}
+              {featuredImage && <img src={featuredImage} alt="Featured" className="w-full max-h-64 object-cover mb-8" />}
               <h1 className="text-4xl font-black uppercase mb-4">{title || "Sin título"}</h1>
               {description && <p className="text-base text-noir-gray-4 mb-8 leading-relaxed">{description}</p>}
               <div className="space-y-6">
@@ -1204,61 +1067,24 @@ function PageBlockEditor({ page, isNew = false, onSave, onBack }: {
                   <div key={b.id}>
                     {b.type === "heading" && <h2 className="text-2xl font-black uppercase">{b.content || "Título vacío"}</h2>}
                     {b.type === "text" && <p className="text-sm leading-relaxed text-noir-gray-4 whitespace-pre-wrap">{b.content || "(párrafo vacío)"}</p>}
-                    {b.type === "image" && b.content && (
-                      <div>
-                        <img src={b.content} alt="" className="w-full object-cover" />
-                        {b.extra && <p className="text-[10px] text-noir-gray-4 mt-1">{b.extra}</p>}
-                      </div>
-                    )}
-                    {b.type === "video" && b.content && (
-                      <div className="bg-noir-gray p-4 text-center text-xs text-noir-gray-4">
-                        Video: {b.content}
-                      </div>
-                    )}
-                    {b.type === "button" && (
-                      <button className="bg-noir-black text-white px-8 py-3 text-xs font-bold tracking-widest uppercase">
-                        {b.content || "Botón"}
-                      </button>
-                    )}
+                    {b.type === "image" && b.content && <img src={b.content} alt="" className="w-full object-cover" />}
+                    {b.type === "button" && <button className="bg-noir-black text-white px-8 py-3 text-xs font-bold tracking-widest uppercase">{b.content || "Botón"}</button>}
                     {b.type === "divider" && <hr className="border-noir-gray-2" />}
                   </div>
                 ))}
               </div>
             </div>
           ) : (
-            /* ── Edit mode ── */
             <div className="max-w-2xl mx-auto py-10 px-6">
-              {/* Title */}
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => handleTitleChange(e.target.value)}
-                placeholder="Título de la página"
-                className="w-full text-3xl font-black uppercase outline-none bg-transparent border-b-2 border-transparent focus:border-noir-black transition-colors pb-2 mb-3 placeholder-noir-gray-3"
-              />
-
-              {/* Slug */}
+              <input type="text" value={title} onChange={(e) => handleTitleChange(e.target.value)} placeholder="Título de la página"
+                className="w-full text-3xl font-black uppercase outline-none bg-transparent border-b-2 border-transparent focus:border-noir-black transition-colors pb-2 mb-3 placeholder-noir-gray-3" />
               <div className="flex items-center gap-2 mb-5">
                 <span className="text-xs text-noir-gray-4 font-mono">noirlovers.com/</span>
-                <input
-                  type="text"
-                  value={slug}
-                  onChange={(e) => setSlug(e.target.value)}
-                  placeholder="url-de-la-pagina"
-                  className="text-xs font-mono text-noir-gray-4 outline-none border-b border-transparent focus:border-noir-gray-4 transition-colors bg-transparent"
-                />
+                <input type="text" value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="url-de-la-pagina"
+                  className="text-xs font-mono text-noir-gray-4 outline-none border-b border-transparent focus:border-noir-gray-4 transition-colors bg-transparent" />
               </div>
-
-              {/* Description */}
-              <textarea
-                value={description}
-                onChange={(e) => setDesc(e.target.value)}
-                rows={2}
-                placeholder="Descripción breve de la página (opcional, aparece como subtítulo)..."
-                className="w-full text-sm text-noir-gray-4 outline-none bg-transparent border border-noir-gray-2 px-4 py-3 focus:border-noir-black transition-colors resize-none mb-6"
-              />
-
-              {/* Featured image */}
+              <textarea value={description} onChange={(e) => setDesc(e.target.value)} rows={2} placeholder="Descripción breve..."
+                className="w-full text-sm text-noir-gray-4 outline-none bg-transparent border border-noir-gray-2 px-4 py-3 focus:border-noir-black transition-colors resize-none mb-6" />
               <div className="mb-6">
                 <p className="text-[10px] font-black tracking-widest uppercase text-noir-gray-4 mb-2">IMAGEN DESTACADA</p>
                 {featuredImage ? (
@@ -1270,67 +1096,45 @@ function PageBlockEditor({ page, isNew = false, onSave, onBack }: {
                     </div>
                   </div>
                 ) : (
-                  <button
-                    onClick={() => featImgRef.current?.click()}
-                    className="w-full border-2 border-dashed border-noir-gray-2 py-8 text-center hover:border-noir-black transition-colors"
-                  >
+                  <button onClick={() => featImgRef.current?.click()}
+                    className="w-full border-2 border-dashed border-noir-gray-2 py-8 text-center hover:border-noir-black transition-colors">
                     <Upload size={20} className="mx-auto text-noir-gray-4 mb-2" />
-                    <p className="text-xs text-noir-gray-4">Haz clic para <span className="font-bold text-noir-black">subir la imagen destacada</span></p>
-                    <p className="text-[10px] text-noir-gray-4 mt-1">PNG, JPG, WEBP</p>
+                    <p className="text-xs text-noir-gray-4">Haz clic para subir la imagen destacada</p>
                   </button>
                 )}
                 <input ref={featImgRef} type="file" accept="image/*" className="hidden"
-                  onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFeaturedImageFile(f); }} />
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) setFeatImg(URL.createObjectURL(f)); }} />
               </div>
-
-              {/* Divider */}
               <div className="border-t border-noir-gray-2 mb-6" />
-
-              {/* Blocks */}
               <div className="space-y-3 mb-4">
                 {blocks.length === 0 && (
-                  <div
-                    onClick={() => setShowBlockPicker(true)}
-                    className="border-2 border-dashed border-noir-gray-2 p-10 text-center cursor-pointer hover:border-noir-black transition-colors"
-                  >
+                  <div onClick={() => setShowBlockPicker(true)}
+                    className="border-2 border-dashed border-noir-gray-2 p-10 text-center cursor-pointer hover:border-noir-black transition-colors">
                     <Plus size={20} className="mx-auto text-noir-gray-4 mb-2" />
-                    <p className="text-xs text-noir-gray-4">Haz clic para <span className="font-bold text-noir-black">agregar el primer bloque</span></p>
+                    <p className="text-xs text-noir-gray-4">Haz clic para agregar el primer bloque</p>
                   </div>
                 )}
                 {blocks.map((b, idx) => (
-                  <BlockWidget
-                    key={b.id}
-                    block={b}
-                    idx={idx}
-                    total={blocks.length}
+                  <BlockWidget key={b.id} block={b} idx={idx} total={blocks.length}
                     onUpdate={(patch) => updateBlock(b.id, patch)}
                     onRemove={() => removeBlock(b.id)}
                     onMove={(dir) => moveBlock(b.id, dir)}
                     onImageFile={(file) => handleBlockImageFile(file, b.id)}
-                    onVideoFile={(file) => handleBlockVideoFile(file, b.id)}
+                    onVideoFile={(file) => updateBlock(b.id, { content: URL.createObjectURL(file), extra: file.name })}
                   />
                 ))}
               </div>
-
-              {/* Add block button */}
-              <button
-                onClick={() => setShowBlockPicker((v) => !v)}
-                className="w-full flex items-center justify-center gap-2 border border-dashed border-noir-gray-2 py-3 text-xs font-bold text-noir-gray-4 hover:border-noir-black hover:text-noir-black transition-colors"
-              >
+              <button onClick={() => setShowBlockPicker((v) => !v)}
+                className="w-full flex items-center justify-center gap-2 border border-dashed border-noir-gray-2 py-3 text-xs font-bold text-noir-gray-4 hover:border-noir-black hover:text-noir-black transition-colors">
                 <Plus size={13} /> AGREGAR BLOQUE
               </button>
-
-              {/* Block picker */}
               {showBlockPicker && (
                 <div className="mt-3 bg-white border border-noir-gray-2 p-4">
                   <p className="text-[10px] font-black tracking-widest uppercase text-noir-gray-4 mb-3">TIPO DE BLOQUE</p>
                   <div className="grid grid-cols-3 gap-2">
                     {BLOCK_TYPES_DEF.map((bt) => (
-                      <button
-                        key={bt.type}
-                        onClick={() => addBlock(bt.type)}
-                        className="flex flex-col items-center gap-1.5 border border-noir-gray-2 p-3 hover:border-noir-black hover:bg-noir-gray transition-colors text-center"
-                      >
+                      <button key={bt.type} onClick={() => addBlock(bt.type)}
+                        className="flex flex-col items-center gap-1.5 border border-noir-gray-2 p-3 hover:border-noir-black hover:bg-noir-gray transition-colors text-center">
                         <span className="text-noir-black">{bt.icon}</span>
                         <span className="text-[10px] font-bold uppercase">{bt.label}</span>
                         <span className="text-[9px] text-noir-gray-4">{bt.desc}</span>
@@ -1339,13 +1143,9 @@ function PageBlockEditor({ page, isNew = false, onSave, onBack }: {
                   </div>
                 </div>
               )}
-
-              {/* SEO section */}
               <div className="mt-8 border border-noir-gray-2 bg-white">
-                <button
-                  onClick={() => setShowSeo((v) => !v)}
-                  className="w-full flex items-center justify-between px-5 py-3 text-[10px] font-black tracking-widest uppercase"
-                >
+                <button onClick={() => setShowSeo((v) => !v)}
+                  className="w-full flex items-center justify-between px-5 py-3 text-[10px] font-black tracking-widest uppercase">
                   <span className="flex items-center gap-2"><Globe size={12} /> SEO Y METADATOS</span>
                   {showSeo ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                 </button>
@@ -1354,14 +1154,11 @@ function PageBlockEditor({ page, isNew = false, onSave, onBack }: {
                     <div>
                       <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5">SEO TITLE</label>
                       <input type="text" value={seoTitle} onChange={(e) => setSeoTitle(e.target.value)}
-                        placeholder={title || "Título para buscadores"}
                         className="w-full border border-noir-gray-2 px-3 py-2 text-sm outline-none focus:border-noir-black transition-colors" />
                     </div>
                     <div>
                       <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5">META DESCRIPTION</label>
-                      <textarea value={seoDesc} onChange={(e) => setSeoDesc(e.target.value)}
-                        placeholder="Descripción para buscadores (160 caracteres máx.)"
-                        rows={2} maxLength={160}
+                      <textarea value={seoDesc} onChange={(e) => setSeoDesc(e.target.value)} rows={2} maxLength={160}
                         className="w-full border border-noir-gray-2 px-3 py-2 text-sm outline-none focus:border-noir-black transition-colors resize-none" />
                       <p className="text-[10px] text-noir-gray-4 mt-1 text-right">{seoDesc.length}/160</p>
                     </div>
@@ -1371,17 +1168,12 @@ function PageBlockEditor({ page, isNew = false, onSave, onBack }: {
             </div>
           )}
         </div>
-
-        {/* Right sidebar — settings */}
         {!previewMode && (
           <div className="w-56 bg-white border-l border-noir-gray-2 flex-shrink-0 overflow-y-auto">
             <div className="p-4 border-b border-noir-gray-2">
               <p className="text-[10px] font-black tracking-widest uppercase mb-3">PUBLICACIÓN</p>
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value as "published" | "draft")}
-                className="w-full border border-noir-gray-2 px-3 py-2 text-xs outline-none focus:border-noir-black transition-colors bg-white"
-              >
+              <select value={status} onChange={(e) => setStatus(e.target.value as "published" | "draft")}
+                className="w-full border border-noir-gray-2 px-3 py-2 text-xs outline-none focus:border-noir-black transition-colors bg-white">
                 <option value="published">Publicada</option>
                 <option value="draft">Borrador</option>
               </select>
@@ -1393,47 +1185,19 @@ function PageBlockEditor({ page, isNew = false, onSave, onBack }: {
             <div className="p-4">
               <p className="text-[10px] font-black tracking-widest uppercase mb-2">BLOQUES</p>
               <p className="text-xs font-bold">{blocks.length} bloque{blocks.length !== 1 ? "s" : ""}</p>
-              <div className="mt-2 space-y-1">
-                {blocks.map((b, i) => (
-                  <div key={b.id} className="flex items-center gap-2 text-[9px] text-noir-gray-4">
-                    <span className="bg-noir-gray px-1.5 py-0.5 font-bold uppercase">{b.type.slice(0, 3)}</span>
-                    <span className="truncate">{b.content ? b.content.slice(0, 20) : `Bloque ${i + 1}`}</span>
-                  </div>
-                ))}
-              </div>
             </div>
           </div>
         )}
       </div>
-
-      {/* Hidden file input for block images */}
-      <input ref={fileRef} type="file" accept="image/*,video/*" className="hidden"
-        onChange={async (e) => {
-          const f = e.target.files?.[0];
-          if (!f || !uploadTargetId) return;
-          if (f.type.startsWith("video/")) {
-            await handleBlockVideoFile(f, uploadTargetId);
-          } else {
-            await handleBlockImageFile(f, uploadTargetId);
-          }
-        }}
-      />
     </div>
   );
 }
 
-// ── BlockWidget ───────────────────────────────────────────────────────────────
-
-function BlockWidget({
-  block, idx, total, onUpdate, onRemove, onMove, onImageFile, onVideoFile,
-}: {
-  block: PageBlock;
-  idx: number; total: number;
+function BlockWidget({ block, idx, total, onUpdate, onRemove, onMove, onImageFile, onVideoFile }: {
+  block: PageBlock; idx: number; total: number;
   onUpdate: (patch: Partial<PageBlock>) => void;
-  onRemove: () => void;
-  onMove: (dir: "up" | "down") => void;
-  onImageFile: (f: File) => void;
-  onVideoFile: (f: File) => void;
+  onRemove: () => void; onMove: (dir: "up" | "down") => void;
+  onImageFile: (f: File) => void; onVideoFile: (f: File) => void;
 }) {
   const imgRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLInputElement>(null);
@@ -1441,126 +1205,65 @@ function BlockWidget({
   return (
     <div className="group bg-white border border-noir-gray-2 p-4 hover:border-noir-gray-3 transition-colors">
       <div className="flex items-start gap-3">
-        {/* Type chip */}
-        <span className="text-[9px] font-bold uppercase tracking-widest bg-noir-gray px-2 py-1 text-noir-gray-4 flex-shrink-0 mt-0.5">
-          {block.type}
-        </span>
-
-        {/* Content */}
+        <span className="text-[9px] font-bold uppercase tracking-widest bg-noir-gray px-2 py-1 text-noir-gray-4 flex-shrink-0 mt-0.5">{block.type}</span>
         <div className="flex-1 min-w-0">
           {block.type === "heading" && (
-            <input
-              type="text"
-              placeholder="Escribe el título de la sección..."
-              value={block.content}
-              onChange={(e) => onUpdate({ content: e.target.value })}
-              className="w-full text-xl font-black uppercase outline-none border-b border-transparent focus:border-noir-gray-2 transition-colors bg-transparent"
-            />
+            <input type="text" placeholder="Escribe el título..." value={block.content} onChange={(e) => onUpdate({ content: e.target.value })}
+              className="w-full text-xl font-black uppercase outline-none border-b border-transparent focus:border-noir-gray-2 transition-colors bg-transparent" />
           )}
-
           {block.type === "text" && (
-            <textarea
-              rows={4}
-              placeholder="Escribe el contenido del párrafo aquí..."
-              value={block.content}
-              onChange={(e) => onUpdate({ content: e.target.value })}
-              className="w-full text-sm outline-none border border-noir-gray-2 px-3 py-2 focus:border-noir-black transition-colors resize-y"
-            />
+            <textarea rows={4} placeholder="Escribe el contenido..." value={block.content} onChange={(e) => onUpdate({ content: e.target.value })}
+              className="w-full text-sm outline-none border border-noir-gray-2 px-3 py-2 focus:border-noir-black transition-colors resize-y" />
           )}
-
           {block.type === "image" && (
             <div>
               {block.content ? (
                 <div className="relative group/img">
                   <img src={block.content} alt="" className="max-h-48 object-contain border border-noir-gray-2 w-full" />
-                  {block.extra && <p className="text-[10px] text-noir-gray-4 mt-1">{block.extra}</p>}
                   <div className="absolute inset-0 bg-noir-black/0 group-hover/img:bg-noir-black/20 transition-colors flex items-center justify-center gap-2 opacity-0 group-hover/img:opacity-100">
                     <button onClick={() => imgRef.current?.click()} className="bg-white text-xs font-bold px-3 py-1">CAMBIAR</button>
                     <button onClick={() => onUpdate({ content: "", extra: "" })} className="bg-red-600 text-white text-xs font-bold px-3 py-1">QUITAR</button>
                   </div>
                 </div>
               ) : (
-                <div
-                  onClick={() => imgRef.current?.click()}
-                  className="border-2 border-dashed border-noir-gray-2 p-8 text-center cursor-pointer hover:border-noir-black transition-colors"
-                >
+                <div onClick={() => imgRef.current?.click()}
+                  className="border-2 border-dashed border-noir-gray-2 p-8 text-center cursor-pointer hover:border-noir-black transition-colors">
                   <Upload size={20} className="mx-auto text-noir-gray-4 mb-2" />
-                  <p className="text-xs text-noir-gray-4">Haz clic para <span className="font-bold text-noir-black">subir una imagen</span></p>
-                  <p className="text-[10px] text-noir-gray-4 mt-1">PNG, JPG, WEBP — máx. 5 MB</p>
+                  <p className="text-xs text-noir-gray-4">Haz clic para subir una imagen</p>
                 </div>
               )}
               <input ref={imgRef} type="file" accept="image/*" className="hidden"
                 onChange={(e) => { const f = e.target.files?.[0]; if (f) onImageFile(f); e.target.value = ""; }} />
             </div>
           )}
-
           {block.type === "video" && (
             <div className="space-y-2">
-              {/* File upload */}
-              <div
-                onClick={() => videoRef.current?.click()}
-                className="border-2 border-dashed border-noir-gray-2 p-5 text-center cursor-pointer hover:border-noir-black transition-colors"
-              >
+              <div onClick={() => videoRef.current?.click()}
+                className="border-2 border-dashed border-noir-gray-2 p-5 text-center cursor-pointer hover:border-noir-black transition-colors">
                 <Upload size={16} className="mx-auto text-noir-gray-4 mb-1" />
-                <p className="text-xs text-noir-gray-4">
-                  {block.extra ? <span className="font-bold text-noir-black">{block.extra}</span> : <>Subir video <span className="font-bold text-noir-black">(MP4, MOV)</span></>}
-                </p>
+                <p className="text-xs text-noir-gray-4">{block.extra || "Subir video (MP4, MOV)"}</p>
               </div>
               <input ref={videoRef} type="file" accept="video/*" className="hidden"
                 onChange={(e) => { const f = e.target.files?.[0]; if (f) onVideoFile(f); e.target.value = ""; }} />
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] text-noir-gray-4 font-bold">O URL:</span>
-                <input
-                  type="text"
-                  value={block.content}
-                  onChange={(e) => onUpdate({ content: e.target.value })}
-                  placeholder="https://youtube.com/watch?v=..."
-                  className="flex-1 border border-noir-gray-2 px-3 py-2 text-xs outline-none focus:border-noir-black font-mono transition-colors"
-                />
-              </div>
+              <input type="text" value={block.content} onChange={(e) => onUpdate({ content: e.target.value })}
+                placeholder="https://youtube.com/watch?v=..."
+                className="w-full border border-noir-gray-2 px-3 py-2 text-xs outline-none focus:border-noir-black font-mono transition-colors" />
             </div>
           )}
-
           {block.type === "button" && (
             <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Texto del botón"
-                value={block.content}
-                onChange={(e) => onUpdate({ content: e.target.value })}
-                className="flex-1 border border-noir-gray-2 px-3 py-2 text-sm outline-none focus:border-noir-black transition-colors"
-              />
-              <input
-                type="text"
-                placeholder="/ruta o URL"
-                value={block.extra ?? ""}
-                onChange={(e) => onUpdate({ extra: e.target.value })}
-                className="flex-1 border border-noir-gray-2 px-3 py-2 text-sm outline-none focus:border-noir-black font-mono transition-colors"
-              />
+              <input type="text" placeholder="Texto del botón" value={block.content} onChange={(e) => onUpdate({ content: e.target.value })}
+                className="flex-1 border border-noir-gray-2 px-3 py-2 text-sm outline-none focus:border-noir-black transition-colors" />
+              <input type="text" placeholder="/ruta o URL" value={block.extra ?? ""} onChange={(e) => onUpdate({ extra: e.target.value })}
+                className="flex-1 border border-noir-gray-2 px-3 py-2 text-sm outline-none focus:border-noir-black font-mono transition-colors" />
             </div>
           )}
-
-          {block.type === "divider" && (
-            <div className="py-2">
-              <hr className="border-t-2 border-noir-gray-2" />
-              <p className="text-[10px] text-noir-gray-4 mt-1">Línea divisora</p>
-            </div>
-          )}
+          {block.type === "divider" && <div className="py-2"><hr className="border-t-2 border-noir-gray-2" /><p className="text-[10px] text-noir-gray-4 mt-1">Línea divisora</p></div>}
         </div>
-
-        {/* Controls */}
         <div className="flex flex-col gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button onClick={() => onMove("up")} disabled={idx === 0}
-            className="text-noir-gray-4 hover:text-noir-black disabled:opacity-20 transition-colors">
-            <ChevronUp size={14} />
-          </button>
-          <button onClick={() => onMove("down")} disabled={idx === total - 1}
-            className="text-noir-gray-4 hover:text-noir-black disabled:opacity-20 transition-colors">
-            <ChevronDown size={14} />
-          </button>
-          <button onClick={onRemove} className="text-noir-gray-4 hover:text-red-500 transition-colors">
-            <Trash2 size={14} />
-          </button>
+          <button onClick={() => onMove("up")} disabled={idx === 0} className="text-noir-gray-4 hover:text-noir-black disabled:opacity-20 transition-colors"><ChevronUp size={14} /></button>
+          <button onClick={() => onMove("down")} disabled={idx === total - 1} className="text-noir-gray-4 hover:text-noir-black disabled:opacity-20 transition-colors"><ChevronDown size={14} /></button>
+          <button onClick={onRemove} className="text-noir-gray-4 hover:text-red-500 transition-colors"><Trash2 size={14} /></button>
         </div>
       </div>
     </div>
