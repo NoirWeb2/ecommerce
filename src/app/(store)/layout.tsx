@@ -2,7 +2,7 @@
 import Navbar from "@/components/store/Navbar";
 import Footer from "@/components/store/Footer";
 import CartSidebar from "@/components/store/CartSidebar";
-import { prisma } from "@/lib/prisma";
+
 
 export default async function StoreLayout({
 children,
