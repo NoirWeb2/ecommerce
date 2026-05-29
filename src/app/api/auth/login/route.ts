@@ -14,46 +14,87 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { email, password, adminOnly } = loginSchema.parse(body);
 
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    // User not found
     if (!user || !user.password) {
-      return NextResponse.json({ error: "Credenciales inválidas" }, { status: 401 });
+      return NextResponse.json(
+        { error: "Credenciales inválidas" },
+        { status: 401 }
+      );
     }
 
+    // Password validation
     const isValid = await comparePassword(password, user.password);
+
     if (!isValid) {
-      return NextResponse.json({ error: "Credenciales inválidas" }, { status: 401 });
+      return NextResponse.json(
+        { error: "Credenciales inválidas" },
+        { status: 401 }
+      );
     }
 
+    // Admin validation
     if (adminOnly && !["ADMIN", "SUPER_ADMIN"].includes(user.role)) {
-      return NextResponse.json({ error: "Sin permisos de administrador" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Sin permisos de administrador" },
+        { status: 403 }
+      );
     }
 
+    // Email verification validation
+    if (!user.emailVerified && user.role === "CUSTOMER") {
+      return NextResponse.json(
+        {
+          error: "Debes confirmar tu correo antes de iniciar sesión.",
+        },
+        { status: 403 }
+      );
+    }
+
+    // Generate JWT
     const token = await signToken({
       userId: user.id,
       email: user.email,
       role: user.role,
     });
 
+    // Response
     const response = NextResponse.json({
-      token,
-      user: { id: user.id, email: user.email, name: user.name, role: user.role },
+      success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+      },
     });
 
-    // Set cookie server-side so middleware can read it reliably
+    // Auth cookie
     response.cookies.set("auth-token", token, {
-      httpOnly: false, // needs to be readable for Zustand auth store
+      httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60,
       path: "/",
+      maxAge: 60 * 60 * 24 * 7, // 7 days
     });
 
     return response;
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: "Datos inválidos" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Datos inválidos" },
+        { status: 400 }
+      );
     }
+
     console.error(error);
-    return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
+
+    return NextResponse.json(
+      { error: "Error interno del servidor" },
+      { status: 500 }
+    );
   }
 }
