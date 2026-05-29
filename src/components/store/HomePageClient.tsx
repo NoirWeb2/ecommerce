@@ -115,24 +115,28 @@ const [categories, setCategories] = useState<Category[]>([]);
 useEffect(() => {
   async function loadData() {
     try {
-      // Pedimos Productos y Categorías al mismo tiempo SIN CACHÉ
+      // 💡 AQUÍ ESTÁ LA MAGIA CONTRA EL CACHÉ: Le agregamos la hora exacta a la URL
+      const cacheBuster = Date.now();
+      
       const [resProd, resCat] = await Promise.all([
-        fetch("/api/products", { cache: "no-store" }),
-        fetch("/api/categories", { cache: "no-store" })
+        fetch(`/api/products?t=${cacheBuster}`, { cache: "no-store" }),
+        fetch(`/api/categories?t=${cacheBuster}`, { cache: "no-store" })
       ]);
 
       if (resProd.ok) {
         const dataProd = await resProd.json();
         const allProducts = dataProd.products || [];
+        
         // 1. Separar Destacados
         setFeaturedProducts(allProducts.filter((p: Product) => p.isFeatured));
-        // 2. Separar los 5 más nuevos (por fecha de creación)
+        
+        // 2. Separar los 5 más nuevos
         setLatestProducts(allProducts.slice(0, 5));
       }
 
       if (resCat.ok) {
         const dataCat = await resCat.json();
-        // Tomamos máximo 4 categorías activas para que cuadre el diseño del grid
+        // Tomamos máximo 4 categorías
         setCategories((dataCat.categories || []).slice(0, 4));
       }
 
