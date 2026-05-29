@@ -414,7 +414,15 @@ export default function PaginasPage() {
             className="flex items-center gap-2 border border-noir-gray-2 px-4 py-2 text-xs font-bold tracking-widest uppercase hover:border-noir-black transition-colors">
             <Eye size={13} /> VER TIENDA
           </a>
-          <button onClick={() => handleSave()} disabled={saving}
+          <button onClick={() => {
+            if (tab === "banners") handleSave("Banner");
+            else if (tab === "textos") handleSave("Textos");
+            else if (tab === "filosofia") handleSave("Filosofía");
+            else if (tab === "contacto") handleSave("Contacto");
+            else if (tab === "header") handleSave("Header");
+            else if (tab === "footer") handleSave("Footer");
+            else if (tab === "seo") handleSave("SEO");
+          }} disabled={saving}
             className="flex items-center gap-2 bg-noir-black text-white px-4 py-2 text-xs font-bold tracking-widest uppercase hover:bg-black transition-colors disabled:opacity-60">
             {saving ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />} {saving ? "GUARDANDO..." : "GUARDAR"}
           </button>
