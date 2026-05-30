@@ -11,7 +11,8 @@ interface Product {
 id: string; name: string; sku: string | null; price: number; status: "ACTIVE" | "DRAFT" | "ARCHIVED";
 category: { id: string; name: string } | null; images: ProductImage[]; variants: Variant[];
 isFeatured: boolean;
-tags: string[]; // 💡 ADDON
+isNew: boolean; // 💡 NUEVO
+tags: string[]; 
 }
 interface Category { id: string; name: string; slug: string; image: string | null; _count: { products: number }; }
 
@@ -82,14 +83,14 @@ const [search, setSearch] = useState("");
 const [filterCat, setFilterCat] = useState<string>("all");
 
 const [editProduct, setEditProduct] = useState<Product | null>(null);
-const [editForm, setEditForm] = useState<{ name: string; sku: string; price: number; stock: number; status: "ACTIVE" | "DRAFT" | "ARCHIVED"; categoryName: string; description: string; images: string[]; isFeatured: boolean; isAddon: boolean; } | null>(null);
+const [editForm, setEditForm] = useState<{ name: string; sku: string; price: number; stock: number; status: "ACTIVE" | "DRAFT" | "ARCHIVED"; categoryName: string; description: string; images: string[]; isFeatured: boolean; isNew: boolean; isAddon: boolean; } | null>(null);
 const [saving, setSaving] = useState(false);
 
 const [deleteId, setDeleteId] = useState<string | null>(null);
 const [deleting, setDeleting] = useState(false);
 
 const [createOpen, setCreateOpen] = useState(false);
-const [createForm, setCreateForm] = useState<{ name: string; sku: string; price: number; stock: number; status: "ACTIVE" | "DRAFT" | "ARCHIVED"; categoryName: string; description: string; images: string[]; isFeatured: boolean; isAddon: boolean; }>({ name: "", sku: "", price: 0, stock: 0, status: "DRAFT", categoryName: "", description: "", images: [], isFeatured: false, isAddon: false });
+const [createForm, setCreateForm] = useState<{ name: string; sku: string; price: number; stock: number; status: "ACTIVE" | "DRAFT" | "ARCHIVED"; categoryName: string; description: string; images: string[]; isFeatured: boolean; isNew: boolean; isAddon: boolean; }>({ name: "", sku: "", price: 0, stock: 0, status: "DRAFT", categoryName: "", description: "", images: [], isFeatured: false, isNew: false, isAddon: false });
 const [creating, setCreating] = useState(false);
 
 const [newCatName, setNewCatName] = useState("");
@@ -117,7 +118,9 @@ const openEdit = (p: Product) => {
   setEditProduct(p);
   setEditForm({
     name: p.name, sku: p.sku ?? "", price: p.price, stock: totalStock(p.variants), status: p.status, categoryName: p.category?.name ?? "",
-    description: "", images: p.images.map((img) => img.url), isFeatured: p.isFeatured ?? false,
+    description: "", images: p.images.map((img) => img.url), 
+    isFeatured: p.isFeatured ?? false,
+    isNew: p.isNew ?? false, // 💡 CARGAMOS EL VALOR DE "NUEVO" DESDE LA BD
     isAddon: p.tags?.includes("ADDON") ?? false,
   });
 };
@@ -172,7 +175,7 @@ const handleCreate = async (e: React.FormEvent) => {
   if (res.ok) {
     toast.success("Producto creado");
     await loadData();
-    setCreateOpen(false); setCreateForm({ name: "", sku: "", price: 0, stock: 0, status: "DRAFT", categoryName: "", description: "", images: [], isFeatured: false, isAddon: false });
+    setCreateOpen(false); setCreateForm({ name: "", sku: "", price: 0, stock: 0, status: "DRAFT", categoryName: "", description: "", images: [], isFeatured: false, isNew: false, isAddon: false });
   } else toast.error("Error al crear producto");
   setCreating(false);
 };
@@ -231,9 +234,9 @@ return (
                           <span className="text-sm font-medium line-clamp-2 max-w-[200px] flex flex-col items-start gap-1">
                             {p.name}
                             <div className="flex gap-2">
+                              {p.isNew && <span className="bg-black text-white text-[8px] font-bold px-1.5 py-0.5 uppercase">NUEVO</span>}
                               {p.isFeatured && <Star size={12} className="text-yellow-500 fill-yellow-500" />}
-                              {/* 💡 AQUI ESTABA EL ERROR DEL TITLE: Ya se lo borré */}
-                              {isAddon && <ShoppingCart size={12} className="text-blue-500" />}
+                              {isAddon && <ShoppingCart size={12} className="text-blue-500" title="Add-on de Carrito" />}
                             </div>
                           </span>
                         </div>
@@ -352,21 +355,29 @@ return (
               <div><label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5">PRECIO (COP)</label><input required type="number" value={editForm.price} onChange={(e) => setEditForm({ ...editForm, price: Number(e.target.value) })} className="w-full border border-noir-gray-2 px-4 py-2.5 text-sm outline-none focus:border-noir-black transition-colors" /></div>
               <div><label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5">STOCK TOTAL</label><input type="number" value={editForm.stock} onChange={(e) => setEditForm({ ...editForm, stock: Number(e.target.value) })} className="w-full border border-noir-gray-2 px-4 py-2.5 text-sm outline-none focus:border-noir-black transition-colors" /></div>
             </div>
-            <div className="grid grid-cols-3 gap-4 items-center">
+            {/* 💡 FIX: Cuadrícula en 4 columnas para que quepan todos los switches */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 items-center">
               <div>
                 <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5">ESTADO</label>
                 <select value={editForm.status} onChange={(e) => setEditForm({ ...editForm, status: e.target.value as "ACTIVE" | "DRAFT" | "ARCHIVED" })} className="w-full border border-noir-gray-2 px-4 py-2.5 text-sm outline-none focus:border-noir-black transition-colors bg-white">
                   <option value="ACTIVE">Activo</option><option value="DRAFT">Borrador</option><option value="ARCHIVED">Archivado</option>
                 </select>
               </div>
+              {/* 💡 NUEVO: Toggle de NUEVO */}
+              <div>
+                <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5">¿NUEVO?</label>
+                <button type="button" onClick={() => setEditForm({ ...editForm, isNew: !editForm.isNew })} className={`flex items-center gap-2 text-xs font-bold uppercase transition-colors px-2 py-2.5 ${editForm.isNew ? "text-green-600" : "text-noir-gray-4"}`}>
+                  {editForm.isNew ? <ToggleRight size={22} /> : <ToggleLeft size={22} />} Sí
+                </button>
+              </div>
               <div>
                 <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5">DESTACADO</label>
-                <button type="button" onClick={() => setEditForm({ ...editForm, isFeatured: !editForm.isFeatured })} className={`flex items-center gap-2 text-xs font-bold uppercase transition-colors px-2 py-2.5 ${editForm.isFeatured ? "text-green-600" : "text-noir-gray-4"}`}>
+                <button type="button" onClick={() => setEditForm({ ...editForm, isFeatured: !editForm.isFeatured })} className={`flex items-center gap-2 text-xs font-bold uppercase transition-colors px-2 py-2.5 ${editForm.isFeatured ? "text-yellow-600" : "text-noir-gray-4"}`}>
                   {editForm.isFeatured ? <ToggleRight size={22} /> : <ToggleLeft size={22} />} Sí
                 </button>
               </div>
               <div>
-                <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5" title="Se muestra en el carrito de compras">ADD-ON (CARRITO)</label>
+                <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5" title="Se muestra en el carrito">ADD-ON</label>
                 <button type="button" onClick={() => setEditForm({ ...editForm, isAddon: !editForm.isAddon })} className={`flex items-center gap-2 text-xs font-bold uppercase transition-colors px-2 py-2.5 ${editForm.isAddon ? "text-blue-600" : "text-noir-gray-4"}`}>
                   {editForm.isAddon ? <ToggleRight size={22} /> : <ToggleLeft size={22} />} Sí
                 </button>
@@ -384,11 +395,11 @@ return (
       </div>
     )}
 
-    {/* Create modal */}
+    {/* Create modal Product */}
     {createOpen && (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div className="absolute inset-0 bg-noir-black/50" onClick={() => setCreateOpen(false)} />
-        <div className="relative bg-white w-full max-w-lg max-h-[90vh] overflow-y-auto p-6">
+        <div className="relative bg-white w-full max-w-xl max-h-[90vh] overflow-y-auto p-6">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-sm font-black uppercase">NUEVO PRODUCTO</h2>
             <button onClick={() => setCreateOpen(false)} className="text-noir-gray-4 hover:text-noir-black"><X size={18} /></button>
@@ -408,21 +419,29 @@ return (
               <div><label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5">PRECIO (COP) *</label><input required type="number" min={0} value={createForm.price} onChange={(e) => setCreateForm({ ...createForm, price: Number(e.target.value) })} className="w-full border border-noir-gray-2 px-4 py-2.5 text-sm outline-none focus:border-noir-black transition-colors" /></div>
               <div><label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5">STOCK INICIAL</label><input type="number" min={0} value={createForm.stock} onChange={(e) => setCreateForm({ ...createForm, stock: Number(e.target.value) })} className="w-full border border-noir-gray-2 px-4 py-2.5 text-sm outline-none focus:border-noir-black transition-colors" /></div>
             </div>
-            <div className="grid grid-cols-3 gap-4 items-center">
+            {/* 💡 FIX: Cuadrícula en 4 columnas para los switches */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 items-center">
               <div>
                 <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5">ESTADO</label>
                 <select value={createForm.status} onChange={(e) => setCreateForm({ ...createForm, status: e.target.value as "ACTIVE" | "DRAFT" | "ARCHIVED" })} className="w-full border border-noir-gray-2 px-4 py-2.5 text-sm outline-none focus:border-noir-black transition-colors bg-white">
                   <option value="DRAFT">Borrador</option><option value="ACTIVE">Activo</option><option value="ARCHIVED">Archivado</option>
                 </select>
               </div>
+              {/* 💡 NUEVO: Toggle de NUEVO */}
+              <div>
+                <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5">¿NUEVO?</label>
+                <button type="button" onClick={() => setCreateForm({ ...createForm, isNew: !createForm.isNew })} className={`flex items-center gap-2 text-xs font-bold uppercase transition-colors px-2 py-2.5 ${createForm.isNew ? "text-green-600" : "text-noir-gray-4"}`}>
+                  {createForm.isNew ? <ToggleRight size={22} /> : <ToggleLeft size={22} />} Sí
+                </button>
+              </div>
               <div>
                 <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5">DESTACADO</label>
-                <button type="button" onClick={() => setCreateForm({ ...createForm, isFeatured: !createForm.isFeatured })} className={`flex items-center gap-2 text-xs font-bold uppercase transition-colors px-2 py-2.5 ${createForm.isFeatured ? "text-green-600" : "text-noir-gray-4"}`}>
+                <button type="button" onClick={() => setCreateForm({ ...createForm, isFeatured: !createForm.isFeatured })} className={`flex items-center gap-2 text-xs font-bold uppercase transition-colors px-2 py-2.5 ${createForm.isFeatured ? "text-yellow-600" : "text-noir-gray-4"}`}>
                   {createForm.isFeatured ? <ToggleRight size={22} /> : <ToggleLeft size={22} />} Sí
                 </button>
               </div>
               <div>
-                <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5" title="Se muestra en el carrito de compras">ADD-ON (CARRITO)</label>
+                <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5" title="Se muestra en el carrito">ADD-ON</label>
                 <button type="button" onClick={() => setCreateForm({ ...createForm, isAddon: !createForm.isAddon })} className={`flex items-center gap-2 text-xs font-bold uppercase transition-colors px-2 py-2.5 ${createForm.isAddon ? "text-blue-600" : "text-noir-gray-4"}`}>
                   {createForm.isAddon ? <ToggleRight size={22} /> : <ToggleLeft size={22} />} Sí
                 </button>

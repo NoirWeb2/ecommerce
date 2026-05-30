@@ -64,8 +64,8 @@ if (!admin) return NextResponse.json({ error: "No autorizado" }, { status: 401 }
 // 💡 FIX: SALVAVIDAS PUESTO
 try {
   const body = await req.json();
-  // 💡 NUEVO: Desestructuramos el isAddon para leerlo
-  const { name, sku, price, stock, status, categoryName, description, images, isFeatured, isAddon } = body;
+  // 💡 NUEVO: Desestructuramos el isAddon y el isNew para leerlos
+  const { name, sku, price, stock, status, categoryName, description, images, isFeatured, isAddon, isNew } = body;
 
   const slug = name
     .toLowerCase()
@@ -91,7 +91,8 @@ try {
       description,
       categoryId,
       isFeatured: isFeatured ?? false,
-      // 💡 NUEVO: Si está el switch prendido, le ponemos la etiqueta "ADDON"
+      isNew: isNew ?? false, // 💡 NUEVO: Lo guardamos en la BD
+      // Si está el switch prendido, le ponemos la etiqueta "ADDON"
       tags: isAddon ? ["ADDON"] : [], 
       variants: stock > 0
         ? { create: [{ size: "UNICO", stock: Number(stock) }] }
