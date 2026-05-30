@@ -1,8 +1,10 @@
-revisa todo antes de ajustar algo que dañe...
 import Navbar from "@/components/store/Navbar";
 import Footer from "@/components/store/Footer";
 import CartSidebar from "@/components/store/CartSidebar";
 import { prisma } from "@/lib/prisma";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function StoreLayout({
 children,
@@ -11,7 +13,6 @@ children: React.ReactNode;
 }) {
 let map: Record<string, Record<string, string>> = {};
 
-// 💡 LE PONEMOS TRY/CATCH PARA QUE NO EXPLOTE LA PÁGINA SI FALLA LA BD
 try {
   const settings = await prisma.siteSetting.findMany({
     where: {
@@ -25,7 +26,6 @@ try {
   }
 } catch (error) {
   console.error("Error cargando el layout:", error);
-  // Si falla, el mapa queda vacío y usa los fallbacks, pero no tumba la página.
 }
 
 let headerData = null;
