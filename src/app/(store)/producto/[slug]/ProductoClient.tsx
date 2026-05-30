@@ -136,16 +136,20 @@ return (
         <div className="relative aspect-[4/5] overflow-hidden bg-noir-gray">
           <Image src={product.images[currentImage] || "/placeholder-product.jpg"}
             alt={product.name} fill className="object-cover" priority />
-          {product.images.length > 1 && 
-            <button onClick={() => setCurrentImage((p) => (p - 1 + product.images.length) % product.images.length)}
-              className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow transition">
-              <ChevronLeft size={16} />
-            </button>
-            <button onClick={() => setCurrentImage((p) => (p + 1) % product.images.length)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow transition">
-              <ChevronRight size={16} />
-            </button>
-          }
+          
+          {/* 💡 AQUÍ ESTABA EL ERROR DE SINTAXIS. YA PUSE LOS <> </> */}
+          {product.images.length > 1 && (
+            <>
+              <button onClick={() => setCurrentImage((p) => (p - 1 + product.images.length) % product.images.length)}
+                className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow transition">
+                <ChevronLeft size={16} />
+              </button>
+              <button onClick={() => setCurrentImage((p) => (p + 1) % product.images.length)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow transition">
+                <ChevronRight size={16} />
+              </button>
+            </>
+          )}
         </div>
         {product.images.length > 1 && (
           <div className="grid grid-cols-4 gap-2">
