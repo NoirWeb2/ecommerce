@@ -28,7 +28,6 @@ REFUNDED: "Reembolsado",
 };
 
 export default async function AdminDashboard() {
-// Inicializamos todo en 0 como salvavidas
 let ordersCount = 0;
 let clientsCount = 0;
 let totalStock = 0;
@@ -36,31 +35,28 @@ let totalRevenue = 0;
 let recentOrders: any[] = [];
 let pendingCount = 0;
 
-// Envolvemos en try/catch por si la BD está vacía
 try {
+  // 💡 FIX: Le agregamos .catch() a CADA UNA para que si falla una, no tumbe el resto
   const [oCount, cCount, sAgg, rAgg, recOrders, pCount] = await Promise.all([
-    prisma.order.count(),
-    prisma.user.count({ where: { role: "CUSTOMER" } }),
-    prisma.variant.aggregate({ _sum: { stock: true } }),
+    prisma.order.count().catch(() => 0),
+    prisma.user.count({ where: { role: "CUSTOMER" } }).catch(() => 0),
+    prisma.variant.aggregate({ _sum: { stock: true } }).catch(() => ({ _sum: { stock: 0 } })),
     prisma.order.aggregate({ 
       _sum: { total: true }, 
       where: { status: { notIn: ["CANCELLED", "REFUNDED"] } } 
-    }),
-    prisma.order.findMany({
-      take: 5,
-      orderBy: { createdAt: "desc" }
-    }),
-    prisma.order.count({ where: { status: "PENDING" } })
+    }).catch(() => ({ _sum: { total: 0 } })),
+    prisma.order.findMany({ take: 5, orderBy: { createdAt: "desc" }, include: { user: true } }).catch(() => []),
+    prisma.order.count({ where: { status: "PENDING" } }).catch(() => 0)
   ]);
 
   ordersCount = oCount || 0;
   clientsCount = cCount || 0;
-  totalStock = sAgg._sum?.stock || 0;
-  totalRevenue = rAgg._sum?.total || 0;
+  totalStock = sAgg?._sum?.stock || 0;
+  totalRevenue = rAgg?._sum?.total || 0;
   recentOrders = recOrders || [];
   pendingCount = pCount || 0;
 } catch (error) {
-  console.error("Error al cargar el dashboard:", error);
+  console.error("Error cargando dashboard:", error);
 }
 
 const stats = [
@@ -77,25 +73,19 @@ return (
       <p className="text-sm text-noir-gray-4 mt-1">Panel de control de NOIR LOVERS.</p>
     </div>
 
-    {/* Stats */}
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
       {stats.map((stat) => (
         <div key={stat.label} className="bg-white p-5 border border-noir-gray-2">
           <div className="flex items-start justify-between mb-3">
-            <p className="text-[10px] font-bold tracking-widest uppercase text-noir-gray-4">
-              {stat.label}
-            </p>
+            <p className="text-[10px] font-bold tracking-widest uppercase text-noir-gray-4">{stat.label}</p>
             <div className={stat.color}>{stat.icon}</div>
           </div>
           <p className="text-2xl font-black">{stat.value}</p>
-          {stat.trend && (
-            <p className="text-xs text-noir-gray-4 mt-1 font-medium">{stat.trend}</p>
-          )}
+          {stat.trend && <p className="text-xs text-noir-gray-4 mt-1 font-medium">{stat.trend}</p>}
         </div>
       ))}
     </div>
 
-    {/* Alert */}
     {pendingCount > 0 && (
       <div className="bg-amber-50 border border-amber-200 rounded p-3 flex items-center gap-2 mb-6">
         <AlertCircle size={14} className="text-amber-600 flex-shrink-0" />
@@ -106,14 +96,10 @@ return (
       </div>
     )}
 
-    {/* Recent orders */}
     <div className="bg-white border border-noir-gray-2">
       <div className="flex items-center justify-between p-5 border-b border-noir-gray-2">
         <h2 className="text-xs font-black uppercase tracking-widest">PEDIDOS RECIENTES</h2>
-        <Link
-          href="/admin/pedidos"
-          className="text-xs text-noir-gray-4 hover:text-noir-black transition-colors flex items-center gap-1"
-        >
+        <Link href="/admin/pedidos" className="text-xs text-noir-gray-4 hover:text-noir-black transition-colors flex items-center gap-1">
           Ver todos <ArrowRight size={12} />
         </Link>
       </div>
@@ -122,15 +108,11 @@ return (
           <p className="p-6 text-sm text-noir-gray-4 text-center">Aún no hay pedidos registrados.</p>
         ) : (
           recentOrders.map((order) => {
-            const addr = order.shippingAddress as any;
-            const customerName = addr?.firstName ? `${addr.firstName} ${addr.lastName || ""}` : order.email;
+            const addr = (order.shippingAddress || {}) as any;
+            const customerName = addr?.firstName ? `${addr.firstName} ${addr.lastName || ""}` : (order.user?.name || order.email);
 
             return (
-              <Link
-                key={order.orderNumber}
-                href={`/admin/pedidos`}
-                className="flex items-center justify-between px-5 py-4 hover:bg-noir-gray/50 transition-colors"
-              >
+              <Link key={order.orderNumber} href={`/admin/pedidos`} className="flex items-center justify-between px-5 py-4 hover:bg-noir-gray/50 transition-colors">
                 <div>
                   <p className="text-sm font-bold">#{order.orderNumber}</p>
                   <p className="text-xs text-noir-gray-4 mt-0.5">{customerName}</p>

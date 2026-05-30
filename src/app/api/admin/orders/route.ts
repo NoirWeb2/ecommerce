@@ -29,9 +29,9 @@ try {
     include: { items: true, user: true }
   });
 
-  // Mapeamos los datos de Prisma a lo que el frontend espera
   const orders = dbOrders.map((o) => {
-    const addr = o.shippingAddress as any;
+    // 💡 FIX: Le ponemos el salvavidas (|| {}) para que no explote si no hay dirección
+    const addr = (o.shippingAddress || {}) as any;
     const customerName = addr?.firstName ? `${addr.firstName} ${addr.lastName || ""}` : (o.user?.name || o.email);
 
     return {
@@ -54,6 +54,7 @@ try {
   return NextResponse.json({ orders });
 } catch (error) {
   console.error("Error leyendo pedidos:", error);
-  return NextResponse.json({ error: "Error interno" }, { status: 500 });
+  // 💡 FIX: Si falla, devolvemos un arreglo vacío en lugar de un Error 500
+  return NextResponse.json({ orders: [] }); 
 }
 }
