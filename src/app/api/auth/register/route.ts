@@ -51,12 +51,10 @@ let html = `<div style="font-family:sans-serif;max-width:560px;margin:0 auto;bac
     <p style="font-size:10px;color:#444;text-transform:uppercase;letter-spacing:0.1em;">El negro lo es todo. — Equipo NOIR LOVERS</p>
   </div>`;
 
-// 💡 NUEVO: Intentamos leer la automatización desde la BD
 try {
-  const auto = await prisma.emailAutomation.findUnique({ where: { type: "ORDER_SHIPPED" } }); // Usaremos ORDER_SHIPPED como "VERIFICAR CUENTA" en este caso
+  const auto = await prisma.emailAutomation.findUnique({ where: { type: "ORDER_SHIPPED" } }); // Usaremos ORDER_SHIPPED como VERIFICAR CUENTA
   if (auto && auto.isActive && auto.htmlContent) {
     subject = auto.subject;
-    // Reemplazamos las variables mágicas por los datos reales
     html = auto.htmlContent
       .replace(/{{nombre}}/g, firstName)
       .replace(/{{url_verificacion}}/g, verifyUrl)
@@ -72,7 +70,8 @@ await transporter.sendMail({ from, to: email, subject, html });
 // ==========================================
 // FUNCIÓN PARA ENVIAR EL CORREO DE BIENVENIDA
 // ==========================================
-export async function sendWelcomeEmail(email: string, firstName: string) {
+// 💡 FIX: Le quitamos el "export" a esta función
+async function sendWelcomeEmail(email: string, firstName: string) {
 const transporter = getTransporter();
 if (!transporter) return;
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://noirlovers.com";
@@ -97,12 +96,10 @@ let html = `<div style="font-family:sans-serif;max-width:560px;margin:0 auto;bac
     <p style="font-size:10px;color:#444;text-transform:uppercase;letter-spacing:0.1em;">El negro lo es todo. — Equipo NOIR LOVERS</p>
   </div>`;
 
-// 💡 NUEVO: Intentamos leer la automatización desde la BD
 try {
   const auto = await prisma.emailAutomation.findUnique({ where: { type: "WELCOME" } });
   if (auto && auto.isActive && auto.htmlContent) {
     subject = auto.subject;
-    // Reemplazamos las variables mágicas por los datos reales
     html = auto.htmlContent
       .replace(/{{nombre}}/g, firstName)
       .replace(/{{tienda_url}}/g, appUrl);
