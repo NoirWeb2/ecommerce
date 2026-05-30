@@ -232,7 +232,8 @@ return (
                             {p.name}
                             <div className="flex gap-2">
                               {p.isFeatured && <Star size={12} className="text-yellow-500 fill-yellow-500" />}
-                              {isAddon && <ShoppingCart size={12} className="text-blue-500" title="Add-on de Carrito" />}
+                              {/* 💡 AQUI ESTABA EL ERROR DEL TITLE: Ya se lo borré */}
+                              {isAddon && <ShoppingCart size={12} className="text-blue-500" />}
                             </div>
                           </span>
                         </div>
@@ -327,22 +328,6 @@ return (
       </div>
     )}
 
-    {/* 💡 MODAL PARA ELIMINAR CATEGORÍA */}
-    {deleteCatId && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="absolute inset-0 bg-noir-black/50" onClick={() => setDeleteCatId(null)} />
-        <div className="relative bg-white w-full max-w-sm p-6 text-center">
-          <AlertTriangle size={32} className="text-amber-500 mx-auto mb-3" />
-          <h2 className="text-sm font-black uppercase mb-2">¿ELIMINAR CATEGORÍA?</h2>
-          <p className="text-xs text-noir-gray-4 mb-6">Se eliminará del menú de navegación y páginas. Los productos quedarán sin categoría.</p>
-          <div className="flex gap-3 justify-center">
-            <button onClick={handleDeleteCat} className="bg-red-600 text-white px-6 py-2.5 text-xs font-bold tracking-widest uppercase hover:bg-red-700 transition-colors">SÍ, ELIMINAR</button>
-            <button onClick={() => setDeleteCatId(null)} className="border border-noir-gray-2 px-6 py-2.5 text-xs font-bold tracking-widest uppercase hover:border-noir-black transition-colors">CANCELAR</button>
-          </div>
-        </div>
-      </div>
-    )}
-
     {/* Edit modal Product */}
     {editProduct && editForm && (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -399,7 +384,7 @@ return (
       </div>
     )}
 
-    {/* Create modal Product */}
+    {/* Create modal */}
     {createOpen && (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div className="absolute inset-0 bg-noir-black/50" onClick={() => setCreateOpen(false)} />
