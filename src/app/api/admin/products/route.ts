@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { jwtVerify } from "jose";
 
+export const dynamic = "force-dynamic"; // 🚀 ELIMINA LA CACHÉ DEL ADMIN
+
 async function requireAdmin() {
 const cookieStore = await cookies();
 const token = cookieStore.get("auth-token")?.value;
@@ -39,7 +41,8 @@ if (category && category !== "all") {
 const products = await prisma.product.findMany({
   where,
   include: {
-    images: { orderBy: { order: "asc" }, take: 1 },
+    // 💡 AQUÍ ESTÁ EL FIX: Quitamos 'take: 1' para que traiga TODAS las imágenes al admin
+    images: { orderBy: { order: "asc" } }, 
     category: true,
     variants: true,
   },
@@ -54,7 +57,6 @@ const admin = await requireAdmin();
 if (!admin) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 
 const body = await req.json();
-// 💡 NUEVO: Recibimos isFeatured
 const { name, sku, price, stock, status, categoryName, description, images, isFeatured } = body;
 
 const slug = name
