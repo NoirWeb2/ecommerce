@@ -13,7 +13,6 @@ if (token) {
     const decoded = await jwtVerify(token, secret);
     payload = decoded.payload;
   } catch (error) {
-    // Si el token expiró, fue alterado o es inválido, lo ignoramos
     payload = null;
   }
 }
@@ -23,18 +22,22 @@ if (token) {
 // =========================
 if (pathname.startsWith("/admin")) {
   
-  // Si están en la página de login del admin
   if (pathname === "/admin/login") {
-    // Si ya están logueados Y son administradores, los pasamos directo al panel
     if (payload && (payload.role === "ADMIN" || payload.role === "SUPER_ADMIN")) {
-      return NextResponse.redirect(new URL("/admin", req.url));
+      const res = NextResponse.redirect(new URL("/admin", req.url));
+      res.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+      return res;
     }
-    return NextResponse.next();
+    const res = NextResponse.next();
+    res.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    return res;
   }
 
-  // Para CUALQUIER OTRA ruta de /admin, exigimos que tengan token válido Y que el rol sea ADMIN
+  // Exigimos token válido Y que el rol sea ADMIN
   if (!payload || (payload.role !== "ADMIN" && payload.role !== "SUPER_ADMIN")) {
-    return NextResponse.redirect(new URL("/admin/login", req.url));
+    const res = NextResponse.redirect(new URL("/admin/login", req.url));
+    res.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    return res;
   }
 }
 
@@ -42,17 +45,27 @@ if (pathname.startsWith("/admin")) {
 // RUTAS DE LA CUENTA DEL CLIENTE
 // =========================
 if (pathname.startsWith("/cuenta")) {
-  // Si intentan entrar a /cuenta pero no hay token válido, al login de la tienda
   if (!payload) {
     const loginUrl = new URL("/login", req.url);
     loginUrl.searchParams.set("redirect", pathname);
-    return NextResponse.redirect(loginUrl);
+    const res = NextResponse.redirect(loginUrl);
+    res.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    return res;
   }
 }
 
-return NextResponse.next();
+// 💡 BALA DE PLATA: Le prohibimos estrictamente a Vercel cachear estas rutas
+const response = NextResponse.next();
+if (pathname.startsWith("/admin") || pathname.startsWith("/cuenta")) {
+  response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  response.headers.set("Pragma", "no-cache");
+  response.headers.set("Expires", "0");
 }
 
+return response;
+}
+
+// 💡 MATCHER CORREGIDO: Cubre exactamente /admin a secas y todo lo que esté adentro
 export const config = {
-matcher: ["/admin/:path*", "/cuenta/:path*"],
+matcher: ["/admin", "/admin/:path*", "/cuenta", "/cuenta/:path*"],
 };
