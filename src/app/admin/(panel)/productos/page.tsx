@@ -11,7 +11,7 @@ interface Product {
 id: string; name: string; sku: string | null; price: number; status: "ACTIVE" | "DRAFT" | "ARCHIVED";
 category: { id: string; name: string } | null; images: ProductImage[]; variants: Variant[];
 isFeatured: boolean;
-isNew: boolean; // 💡 NUEVO
+isNew: boolean; 
 tags: string[]; 
 }
 interface Category { id: string; name: string; slug: string; image: string | null; _count: { products: number }; }
@@ -120,7 +120,7 @@ const openEdit = (p: Product) => {
     name: p.name, sku: p.sku ?? "", price: p.price, stock: totalStock(p.variants), status: p.status, categoryName: p.category?.name ?? "",
     description: "", images: p.images.map((img) => img.url), 
     isFeatured: p.isFeatured ?? false,
-    isNew: p.isNew ?? false, // 💡 CARGAMOS EL VALOR DE "NUEVO" DESDE LA BD
+    isNew: p.isNew ?? false, 
     isAddon: p.tags?.includes("ADDON") ?? false,
   });
 };
@@ -236,7 +236,8 @@ return (
                             <div className="flex gap-2">
                               {p.isNew && <span className="bg-black text-white text-[8px] font-bold px-1.5 py-0.5 uppercase">NUEVO</span>}
                               {p.isFeatured && <Star size={12} className="text-yellow-500 fill-yellow-500" />}
-                              {isAddon && <ShoppingCart size={12} className="text-blue-500" title="Add-on de Carrito" />}
+                              {/* 💡 FIX: Le quité el title al ShoppingCart */}
+                              {isAddon && <ShoppingCart size={12} className="text-blue-500" />}
                             </div>
                           </span>
                         </div>
@@ -355,7 +356,6 @@ return (
               <div><label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5">PRECIO (COP)</label><input required type="number" value={editForm.price} onChange={(e) => setEditForm({ ...editForm, price: Number(e.target.value) })} className="w-full border border-noir-gray-2 px-4 py-2.5 text-sm outline-none focus:border-noir-black transition-colors" /></div>
               <div><label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5">STOCK TOTAL</label><input type="number" value={editForm.stock} onChange={(e) => setEditForm({ ...editForm, stock: Number(e.target.value) })} className="w-full border border-noir-gray-2 px-4 py-2.5 text-sm outline-none focus:border-noir-black transition-colors" /></div>
             </div>
-            {/* 💡 FIX: Cuadrícula en 4 columnas para que quepan todos los switches */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 items-center">
               <div>
                 <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5">ESTADO</label>
@@ -363,7 +363,6 @@ return (
                   <option value="ACTIVE">Activo</option><option value="DRAFT">Borrador</option><option value="ARCHIVED">Archivado</option>
                 </select>
               </div>
-              {/* 💡 NUEVO: Toggle de NUEVO */}
               <div>
                 <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5">¿NUEVO?</label>
                 <button type="button" onClick={() => setEditForm({ ...editForm, isNew: !editForm.isNew })} className={`flex items-center gap-2 text-xs font-bold uppercase transition-colors px-2 py-2.5 ${editForm.isNew ? "text-green-600" : "text-noir-gray-4"}`}>
@@ -419,7 +418,6 @@ return (
               <div><label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5">PRECIO (COP) *</label><input required type="number" min={0} value={createForm.price} onChange={(e) => setCreateForm({ ...createForm, price: Number(e.target.value) })} className="w-full border border-noir-gray-2 px-4 py-2.5 text-sm outline-none focus:border-noir-black transition-colors" /></div>
               <div><label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5">STOCK INICIAL</label><input type="number" min={0} value={createForm.stock} onChange={(e) => setCreateForm({ ...createForm, stock: Number(e.target.value) })} className="w-full border border-noir-gray-2 px-4 py-2.5 text-sm outline-none focus:border-noir-black transition-colors" /></div>
             </div>
-            {/* 💡 FIX: Cuadrícula en 4 columnas para los switches */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 items-center">
               <div>
                 <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5">ESTADO</label>
@@ -427,7 +425,6 @@ return (
                   <option value="DRAFT">Borrador</option><option value="ACTIVE">Activo</option><option value="ARCHIVED">Archivado</option>
                 </select>
               </div>
-              {/* 💡 NUEVO: Toggle de NUEVO */}
               <div>
                 <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5">¿NUEVO?</label>
                 <button type="button" onClick={() => setCreateForm({ ...createForm, isNew: !createForm.isNew })} className={`flex items-center gap-2 text-xs font-bold uppercase transition-colors px-2 py-2.5 ${createForm.isNew ? "text-green-600" : "text-noir-gray-4"}`}>
