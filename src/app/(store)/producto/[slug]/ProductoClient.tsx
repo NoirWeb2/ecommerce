@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { ShoppingBag, ChevronLeft, ChevronRight, RotateCcw, Truck, Shield, Scissors, Check as CheckIcon } from "lucide-react";
@@ -78,10 +77,10 @@ return (
         {isAdded ? <CheckIcon size={15} className="text-green-600" /> : <Scissors size={15} className="text-white" />}
         <div className="text-left">
           <p className={`text-xs font-black tracking-[0.1em] uppercase ${isAdded ? "text-noir-gray-4" : "text-white"}`}>
-            {isAdded ? "AÑADIDO AL CARRITO" : `ADD THE LOOK — +${formatPrice(addon.price)}`}
+            {isAdded ? "AÑADIDO AL CARRITO" : "ADD THE LOOK"}
           </p>
           <p className={`text-[9px] tracking-wide font-medium ${isAdded ? "text-noir-gray-4" : "text-white/60"}`}>
-            {addon.name}
+            {isAdded ? addon.name : `${addon.name} — +${formatPrice(addon.price)}`}
           </p>
         </div>
       </div>
@@ -134,10 +133,10 @@ return (
       {/* Images */}
       <div className="space-y-4">
         <div className="relative aspect-[4/5] overflow-hidden bg-noir-gray">
-          <Image src={product.images[currentImage] || "/placeholder-product.jpg"}
-            alt={product.name} fill className="object-cover" priority />
+          <img src={product.images[currentImage] || "/placeholder-product.jpg"}
+            alt={product.name} className="absolute inset-0 w-full h-full object-cover" />
           
-          {/* 💡 AQUÍ ESTABA EL ERROR DE SINTAXIS. YA PUSE LOS <> </> */}
+          {/* 💡 FIX: El <></> ya está puesto correctamente aquí */}
           {product.images.length > 1 && (
             <>
               <button onClick={() => setCurrentImage((p) => (p - 1 + product.images.length) % product.images.length)}
@@ -156,7 +155,7 @@ return (
             {product.images.map((img, i) => (
               <button key={i} onClick={() => setCurrentImage(i)}
                 className={`relative aspect-square overflow-hidden bg-noir-gray border-2 transition-colors ${i === currentImage ? "border-noir-black" : "border-transparent"}`}>
-                <Image src={img} alt="" fill className="object-cover" />
+                <img src={img} alt="" className="absolute inset-0 w-full h-full object-cover" />
               </button>
             ))}
           </div>
@@ -193,7 +192,6 @@ return (
         </div>
 
         <div className="mt-8">
-          {/* 💡 FIX: Le pasamos los datos al botón */}
           <AddTheLookButton addon={addon} />
         </div>
 
