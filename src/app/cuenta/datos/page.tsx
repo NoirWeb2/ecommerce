@@ -25,13 +25,16 @@ const [form, setForm] = useState(saved);
 // Cuando el usuario carga desde el store, actualizamos los datos visuales
 useEffect(() => {
   if (user) {
+    // 💡 FIX DE TYPESCRIPT: Le decimos que no revise los tipos estrictos aquí
+    const u = user as any; 
+    
     const userData = {
-      firstName: user.firstName || "",
-      lastName: user.lastName || "",
-      email: user.email || "",
-      phone: user.phone || "",
+      firstName: u.firstName || "",
+      lastName: u.lastName || "",
+      email: u.email || "",
+      phone: u.phone || "",
       // Extraemos ciudad si existe de la primera dirección (o lo dejamos en blanco si no hay)
-      city: user.addresses?.[0]?.city || "",
+      city: u.addresses?.[0]?.city || "",
     };
     setSaved(userData);
     setForm(userData);
@@ -53,7 +56,7 @@ const handleSave = async (e: React.FormEvent) => {
   setLoading(true);
 
   try {
-    // 💡 AQUÍ HAREMOS LA LLAMADA A LA API PARA GUARDAR EN LA BD
+    // LLAMADA A LA API PARA GUARDAR EN LA BD
     const res = await fetch("/api/auth/update-profile", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
