@@ -5,45 +5,63 @@ import { formatPrice } from "@/lib/utils";
 import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = { title: "Dashboard — Admin NOIR LOVERS" };
-export const dynamic = "force-dynamic"; // 🚀 Siempre lee datos frescos
+export const dynamic = "force-dynamic";
 
 const STATUS_COLORS: Record<string, string> = {
 PENDING: "text-yellow-600 bg-yellow-50",
 CONFIRMED: "text-blue-600 bg-blue-50",
+PROCESSING: "text-purple-600 bg-purple-50",
 SHIPPED: "text-indigo-600 bg-indigo-50",
 DELIVERED: "text-green-600 bg-green-50",
 CANCELLED: "text-red-600 bg-red-50",
+REFUNDED: "text-gray-600 bg-gray-50",
 };
 
 const STATUS_LABELS: Record<string, string> = {
 PENDING: "Pendiente",
 CONFIRMED: "Confirmado",
+PROCESSING: "Procesando",
 SHIPPED: "Enviado",
 DELIVERED: "Entregado",
 CANCELLED: "Cancelado",
+REFUNDED: "Reembolsado",
 };
 
 export default async function AdminDashboard() {
-// 1. Consultar la base de datos en tiempo real
-const [ordersCount, clientsCount, stockAgg, revenueAgg, recentOrders] = await Promise.all([
-  prisma.order.count(),
-  prisma.user.count({ where: { role: "CUSTOMER" } }),
-  prisma.variant.aggregate({ _sum: { stock: true } }),
-  // Sumar solo los pedidos que NO estén cancelados o reembolsados
-  prisma.order.aggregate({ 
-    _sum: { total: true }, 
-    where: { status: { notIn: ["CANCELLED", "REFUNDED"] } } 
-  }),
-  prisma.order.findMany({
-    take: 5,
-    orderBy: { createdAt: "desc" },
-    include: { user: true }
-  })
-]);
+// Inicializamos todo en 0 como salvavidas
+let ordersCount = 0;
+let clientsCount = 0;
+let totalStock = 0;
+let totalRevenue = 0;
+let recentOrders: any[] = [];
+let pendingCount = 0;
 
-const totalRevenue = revenueAgg._sum.total || 0;
-const totalStock = stockAgg._sum.stock || 0;
-const pendingCount = await prisma.order.count({ where: { status: "PENDING" } });
+// Envolvemos en try/catch por si la BD está vacía
+try {
+  const [oCount, cCount, sAgg, rAgg, recOrders, pCount] = await Promise.all([
+    prisma.order.count(),
+    prisma.user.count({ where: { role: "CUSTOMER" } }),
+    prisma.variant.aggregate({ _sum: { stock: true } }),
+    prisma.order.aggregate({ 
+      _sum: { total: true }, 
+      where: { status: { notIn: ["CANCELLED", "REFUNDED"] } } 
+    }),
+    prisma.order.findMany({
+      take: 5,
+      orderBy: { createdAt: "desc" }
+    }),
+    prisma.order.count({ where: { status: "PENDING" } })
+  ]);
+
+  ordersCount = oCount || 0;
+  clientsCount = cCount || 0;
+  totalStock = sAgg._sum?.stock || 0;
+  totalRevenue = rAgg._sum?.total || 0;
+  recentOrders = recOrders || [];
+  pendingCount = pCount || 0;
+} catch (error) {
+  console.error("Error al cargar el dashboard:", error);
+}
 
 const stats = [
   { label: "INGRESOS TOTALES", value: formatPrice(totalRevenue), icon: <TrendingUp size={18} />, color: "text-green-500", trend: "Real" },
@@ -104,7 +122,6 @@ return (
           <p className="p-6 text-sm text-noir-gray-4 text-center">Aún no hay pedidos registrados.</p>
         ) : (
           recentOrders.map((order) => {
-            // Obtener el nombre del cliente de la dirección de envío o del email
             const addr = order.shippingAddress as any;
             const customerName = addr?.firstName ? `${addr.firstName} ${addr.lastName || ""}` : order.email;
 
