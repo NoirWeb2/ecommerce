@@ -9,33 +9,21 @@ import { toast } from "sonner";
 import { nanoid } from "nanoid";
 import type { HomePageData } from "@/lib/page-settings";
 
-interface Product {
-id: string;
-name: string;
-slug: string;
-price: number;
-comparePrice?: number | null;
-images?: string[];
-isFeatured?: boolean;
-}
-
-interface Category {
-id: string;
-name: string;
-slug: string;
-image: string | null;
-}
-
-function ProductCard({ product }: { product: Product }) {
+// 💡 FIX: Le ponemos 'any' para que acepte los objetos de imagen y categoria completos
+function ProductCard({ product }: { product: any }) {
 const [hovered, setHovered] = useState(false);
 const { addItem } = useCartStore();
+
+// 💡 FIX: Ahora extraemos correctamente el ".url" de los objetos de imagen
+const mainImage = product.images?.[0]?.url || "/placeholder-product.jpg";
+const hoverImage = product.images?.[1]?.url || mainImage;
 
 return (
   <div className="group w-full" onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
     <Link href={`/producto/${product.slug}`}>
       <div className="relative overflow-hidden bg-[#F2F2F2]" style={{ aspectRatio: "3/4" }}>
         <img
-          src={hovered ? product.images?.[1] || product.images?.[0] || "/placeholder-product.jpg" : product.images?.[0] || "/placeholder-product.jpg"}
+          src={hovered ? hoverImage : mainImage}
           alt={product.name}
           className="absolute inset-0 w-full h-full object-cover transition-all duration-500"
         />
@@ -45,7 +33,7 @@ return (
               e.preventDefault();
               addItem({
                 id: nanoid(), productId: product.id, name: product.name, price: product.price,
-                image: product.images?.[0] || "/placeholder-product.jpg", quantity: 1, slug: product.slug,
+                image: mainImage, quantity: 1, slug: product.slug,
               });
               toast.success("Agregado al carrito");
             }}
@@ -75,7 +63,7 @@ return (
 );
 }
 
-function ProductRow({ products, emptyMessage }: { products: Product[], emptyMessage: string }) {
+function ProductRow({ products, emptyMessage }: { products: any[], emptyMessage: string }) {
 const [page, setPage] = useState(0);
 const max = Math.ceil(products.length / 5) - 1;
 const visible = products.slice(page * 5, page * 5 + 5);
@@ -108,16 +96,14 @@ return (
 export default function HomePageClient({ pageData }: { pageData: HomePageData }) {
 const { heroBanner, collection1Banner, collection2Banner } = pageData;
 
-const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
-const [latestProducts, setLatestProducts] = useState<Product[]>([]);
-const [categories, setCategories] = useState<Category[]>([]);
+const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
+const [latestProducts, setLatestProducts] = useState<any[]>([]);
+const [categories, setCategories] = useState<any[]>([]);
 
 useEffect(() => {
   async function loadData() {
     try {
-      // 💡 AQUÍ ESTÁ LA MAGIA CONTRA EL CACHÉ: Le agregamos la hora exacta a la URL
       const cacheBuster = Date.now();
-      
       const [resProd, resCat] = await Promise.all([
         fetch(`/api/products?t=${cacheBuster}`, { cache: "no-store" }),
         fetch(`/api/categories?t=${cacheBuster}`, { cache: "no-store" })
@@ -126,17 +112,14 @@ useEffect(() => {
       if (resProd.ok) {
         const dataProd = await resProd.json();
         const allProducts = dataProd.products || [];
-        
         // 1. Separar Destacados
-        setFeaturedProducts(allProducts.filter((p: Product) => p.isFeatured));
-        
+        setFeaturedProducts(allProducts.filter((p: any) => p.isFeatured === true));
         // 2. Separar los 5 más nuevos
         setLatestProducts(allProducts.slice(0, 5));
       }
 
       if (resCat.ok) {
         const dataCat = await resCat.json();
-        // Tomamos máximo 4 categorías
         setCategories((dataCat.categories || []).slice(0, 4));
       }
 
