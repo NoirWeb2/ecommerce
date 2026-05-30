@@ -1,11 +1,8 @@
+revisa todo antes de ajustar algo que dañe...
 import Navbar from "@/components/store/Navbar";
 import Footer from "@/components/store/Footer";
 import CartSidebar from "@/components/store/CartSidebar";
 import { prisma } from "@/lib/prisma";
-
-// 🚀 BALA DE PLATA CONTRA EL CACHÉ DEL FRONTEND:
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
 
 export default async function StoreLayout({
 children,
