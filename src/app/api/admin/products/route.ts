@@ -64,7 +64,8 @@ if (!admin) return NextResponse.json({ error: "No autorizado" }, { status: 401 }
 // 💡 FIX: SALVAVIDAS PUESTO
 try {
   const body = await req.json();
-  const { name, sku, price, stock, status, categoryName, description, images, isFeatured } = body;
+  // 💡 NUEVO: Desestructuramos el isAddon para leerlo
+  const { name, sku, price, stock, status, categoryName, description, images, isFeatured, isAddon } = body;
 
   const slug = name
     .toLowerCase()
@@ -90,6 +91,8 @@ try {
       description,
       categoryId,
       isFeatured: isFeatured ?? false,
+      // 💡 NUEVO: Si está el switch prendido, le ponemos la etiqueta "ADDON"
+      tags: isAddon ? ["ADDON"] : [], 
       variants: stock > 0
         ? { create: [{ size: "UNICO", stock: Number(stock) }] }
         : undefined,
