@@ -3,34 +3,37 @@ import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { jwtVerify } from "jose";
 
+export const dynamic = "force-dynamic"; // 🚀 EVITA EL CACHÉ EN LOS CLIENTES
+
 async function requireAdmin() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("auth-token")?.value;
-  if (!token) return null;
-  try {
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET || "noir-lovers-secret");
-    const { payload } = await jwtVerify(token, secret);
-    if (!["ADMIN", "SUPER_ADMIN"].includes(payload.role as string)) return null;
-    return payload;
-  } catch {
-    return null;
-  }
+const cookieStore = await cookies();
+const token = cookieStore.get("auth-token")?.value;
+if (!token) return null;
+try {
+  const secret = new TextEncoder().encode(process.env.JWT_SECRET || "noir-lovers-secret");
+  const { payload } = await jwtVerify(token, secret);
+  if (!["ADMIN", "SUPER_ADMIN"].includes(payload.role as string)) return null;
+  return payload;
+} catch {
+  return null;
+}
 }
 
 function getSegment(orderCount: number, totalSpent: number, lastOrderDate: Date | null): string {
-  if (!lastOrderDate) return "INACTIVE";
-  const daysSince = (Date.now() - new Date(lastOrderDate).getTime()) / (1000 * 60 * 60 * 24);
-  if (daysSince > 180) return "INACTIVE";
-  if (totalSpent >= 800000 || orderCount >= 4) return "VIP";
-  if (orderCount >= 2) return "FREQUENT";
-  if (orderCount === 1) return "NEW";
-  return "INACTIVE";
+if (!lastOrderDate) return "INACTIVE";
+const daysSince = (Date.now() - new Date(lastOrderDate).getTime()) / (1000 * 60 * 60 * 24);
+if (daysSince > 180) return "INACTIVE";
+if (totalSpent >= 800000 || orderCount >= 4) return "VIP";
+if (orderCount >= 2) return "FREQUENT";
+if (orderCount === 1) return "NEW";
+return "INACTIVE";
 }
 
 export async function GET() {
-  const admin = await requireAdmin();
-  if (!admin) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+const admin = await requireAdmin();
+if (!admin) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 
+try {
   const users = await prisma.user.findMany({
     where: { role: "CUSTOMER" },
     include: {
@@ -66,4 +69,9 @@ export async function GET() {
   });
 
   return NextResponse.json({ customers });
+} catch (error) {
+  console.error("Error al cargar los clientes:", error);
+  // 💡 SALVAVIDAS: Devuelve una lista vacía para no romper el panel
+  return NextResponse.json({ customers: [] });
+}
 }
