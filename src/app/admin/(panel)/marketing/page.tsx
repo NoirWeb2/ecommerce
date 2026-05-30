@@ -26,7 +26,9 @@ isActive: boolean;
 }
 
 const DEFAULT_AUTOMATIONS: Automation[] = [
-{ type: "WELCOME", name: "Bienvenida", desc: "Se envía al registrarse", subject: "Bienvenido a NOIR LOVERS", htmlContent: "", isActive: true },
+// 💡 NUEVO: Agregamos el correo de Verificación a la lista
+{ type: "VERIFY_EMAIL", name: "Verificar Cuenta", desc: "Para confirmar el correo al registrarse", subject: "Confirma tu correo — NOIR LOVERS", htmlContent: "", isActive: true },
+{ type: "WELCOME", name: "Bienvenida", desc: "Se envía al registrarse y confirmar", subject: "Bienvenido a NOIR LOVERS", htmlContent: "", isActive: true },
 { type: "ABANDONED_CART", name: "Carrito abandonado", desc: "Después de 1 hora sin comprar", subject: "Olvidaste algo...", htmlContent: "", isActive: false },
 { type: "ORDER_CONFIRMATION", name: "Confirmación de compra", desc: "Inmediato al pagar", subject: "Confirmación de tu pedido", htmlContent: "", isActive: true },
 { type: "ORDER_SHIPPED", name: "Tracking del pedido", desc: "Al marcar como enviado", subject: "Tu pedido va en camino", htmlContent: "", isActive: false },
