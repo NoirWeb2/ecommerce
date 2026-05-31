@@ -7,10 +7,15 @@ title: "Tienda — NOIR LOVERS",
 description: "Explora toda la colección de NOIR LOVERS. Moda masculina oscura, hecha en Bogotá, Colombia.",
 };
 
+export const dynamic = "force-dynamic"; // Opcional, pero recomendado para que la tienda siempre muestre el stock real
+
 async function getProducts() {
 try {
   const products = await prisma.product.findMany({
-    where: { status: "ACTIVE" },
+    where: { 
+      status: "ACTIVE",
+      isAddon: false // 👈 ¡ESTA ES LA MAGIA! Oculta todo lo que marcaste como Add-on
+    },
     include: {
       images: { orderBy: { order: "asc" } },
       variants: true,
