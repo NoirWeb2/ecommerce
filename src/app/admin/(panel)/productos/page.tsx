@@ -83,14 +83,16 @@ const [search, setSearch] = useState("");
 const [filterCat, setFilterCat] = useState<string>("all");
 
 const [editProduct, setEditProduct] = useState<Product | null>(null);
-const [editForm, setEditForm] = useState<{ name: string; sku: string; price: number; stock: number; status: "ACTIVE" | "DRAFT" | "ARCHIVED"; categoryName: string; description: string; images: string[]; isFeatured: boolean; isNew: boolean; isAddon: boolean; } | null>(null);
+// 💡 FIX: Agregado hasAddon al estado
+const [editForm, setEditForm] = useState<{ name: string; sku: string; price: number; stock: number; status: "ACTIVE" | "DRAFT" | "ARCHIVED"; categoryName: string; description: string; images: string[]; isFeatured: boolean; isNew: boolean; isAddon: boolean; hasAddon: boolean; } | null>(null);
 const [saving, setSaving] = useState(false);
 
 const [deleteId, setDeleteId] = useState<string | null>(null);
 const [deleting, setDeleting] = useState(false);
 
 const [createOpen, setCreateOpen] = useState(false);
-const [createForm, setCreateForm] = useState<{ name: string; sku: string; price: number; stock: number; status: "ACTIVE" | "DRAFT" | "ARCHIVED"; categoryName: string; description: string; images: string[]; isFeatured: boolean; isNew: boolean; isAddon: boolean; }>({ name: "", sku: "", price: 0, stock: 0, status: "DRAFT", categoryName: "", description: "", images: [], isFeatured: false, isNew: false, isAddon: false });
+// 💡 FIX: Agregado hasAddon al estado
+const [createForm, setCreateForm] = useState<{ name: string; sku: string; price: number; stock: number; status: "ACTIVE" | "DRAFT" | "ARCHIVED"; categoryName: string; description: string; images: string[]; isFeatured: boolean; isNew: boolean; isAddon: boolean; hasAddon: boolean; }>({ name: "", sku: "", price: 0, stock: 0, status: "DRAFT", categoryName: "", description: "", images: [], isFeatured: false, isNew: false, isAddon: false, hasAddon: false });
 const [creating, setCreating] = useState(false);
 
 const [newCatName, setNewCatName] = useState("");
@@ -122,6 +124,7 @@ const openEdit = (p: Product) => {
     isFeatured: p.isFeatured ?? false,
     isNew: p.isNew ?? false, 
     isAddon: p.tags?.includes("ADDON") ?? false,
+    hasAddon: p.tags?.includes("HAS_ADDON") ?? false, // 💡 FIX: Lee si tiene el addon activo
   });
 };
 
@@ -175,7 +178,7 @@ const handleCreate = async (e: React.FormEvent) => {
   if (res.ok) {
     toast.success("Producto creado");
     await loadData();
-    setCreateOpen(false); setCreateForm({ name: "", sku: "", price: 0, stock: 0, status: "DRAFT", categoryName: "", description: "", images: [], isFeatured: false, isNew: false, isAddon: false });
+    setCreateOpen(false); setCreateForm({ name: "", sku: "", price: 0, stock: 0, status: "DRAFT", categoryName: "", description: "", images: [], isFeatured: false, isNew: false, isAddon: false, hasAddon: false });
   } else toast.error("Error al crear producto");
   setCreating(false);
 };
@@ -236,7 +239,6 @@ return (
                             <div className="flex gap-2">
                               {p.isNew && <span className="bg-black text-white text-[8px] font-bold px-1.5 py-0.5 uppercase">NUEVO</span>}
                               {p.isFeatured && <Star size={12} className="text-yellow-500 fill-yellow-500" />}
-                              {/* 💡 FIX: Le quité el title al ShoppingCart */}
                               {isAddon && <ShoppingCart size={12} className="text-blue-500" />}
                             </div>
                           </span>
@@ -356,11 +358,13 @@ return (
               <div><label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5">PRECIO (COP)</label><input required type="number" value={editForm.price} onChange={(e) => setEditForm({ ...editForm, price: Number(e.target.value) })} className="w-full border border-noir-gray-2 px-4 py-2.5 text-sm outline-none focus:border-noir-black transition-colors" /></div>
               <div><label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5">STOCK TOTAL</label><input type="number" value={editForm.stock} onChange={(e) => setEditForm({ ...editForm, stock: Number(e.target.value) })} className="w-full border border-noir-gray-2 px-4 py-2.5 text-sm outline-none focus:border-noir-black transition-colors" /></div>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 items-center">
-              <div>
+            
+            {/* 💡 FIX: Layout Flex Wrap para que quepan todos los switches */}
+            <div className="flex flex-wrap gap-4 items-center mb-2">
+              <div className="w-[120px]">
                 <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5">ESTADO</label>
-                <select value={editForm.status} onChange={(e) => setEditForm({ ...editForm, status: e.target.value as "ACTIVE" | "DRAFT" | "ARCHIVED" })} className="w-full border border-noir-gray-2 px-4 py-2.5 text-sm outline-none focus:border-noir-black transition-colors bg-white">
-                  <option value="ACTIVE">Activo</option><option value="DRAFT">Borrador</option><option value="ARCHIVED">Archivado</option>
+                <select value={editForm.status} onChange={(e) => setEditForm({ ...editForm, status: e.target.value as "ACTIVE" | "DRAFT" | "ARCHIVED" })} className="w-full border border-noir-gray-2 px-3 py-2.5 text-sm outline-none focus:border-noir-black transition-colors bg-white">
+                  <option value="ACTIVE">Activo</option><option value="DRAFT">Borrador</option><option value="ARCHIVED">Archiv</option>
                 </select>
               </div>
               <div>
@@ -376,12 +380,20 @@ return (
                 </button>
               </div>
               <div>
-                <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5" title="Se muestra en el carrito">ADD-ON</label>
+                <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5" title="Se muestra en el carrito de compras">ES ADD-ON</label>
                 <button type="button" onClick={() => setEditForm({ ...editForm, isAddon: !editForm.isAddon })} className={`flex items-center gap-2 text-xs font-bold uppercase transition-colors px-2 py-2.5 ${editForm.isAddon ? "text-blue-600" : "text-noir-gray-4"}`}>
                   {editForm.isAddon ? <ToggleRight size={22} /> : <ToggleLeft size={22} />} Sí
                 </button>
               </div>
+              <div>
+                {/* 💡 NUEVO: Switch "Mostrar Promo" */}
+                <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5" title="Muestra el botón de Add The Look en este producto">MOSTRAR PROMOCIÓN</label>
+                <button type="button" onClick={() => setEditForm({ ...editForm, hasAddon: !editForm.hasAddon })} className={`flex items-center gap-2 text-xs font-bold uppercase transition-colors px-2 py-2.5 ${editForm.hasAddon ? "text-purple-600" : "text-noir-gray-4"}`}>
+                  {editForm.hasAddon ? <ToggleRight size={22} /> : <ToggleLeft size={22} />} Sí
+                </button>
+              </div>
             </div>
+
             <ImageUploader images={editForm.images} onChange={(urls) => setEditForm({ ...editForm, images: urls })} />
             <div className="flex gap-3 pt-2">
               <button type="submit" disabled={saving} className="flex items-center gap-2 bg-noir-black text-white px-7 py-3 text-xs font-bold tracking-widest uppercase hover:bg-black transition-colors disabled:opacity-60">
@@ -418,10 +430,11 @@ return (
               <div><label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5">PRECIO (COP) *</label><input required type="number" min={0} value={createForm.price} onChange={(e) => setCreateForm({ ...createForm, price: Number(e.target.value) })} className="w-full border border-noir-gray-2 px-4 py-2.5 text-sm outline-none focus:border-noir-black transition-colors" /></div>
               <div><label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5">STOCK INICIAL</label><input type="number" min={0} value={createForm.stock} onChange={(e) => setCreateForm({ ...createForm, stock: Number(e.target.value) })} className="w-full border border-noir-gray-2 px-4 py-2.5 text-sm outline-none focus:border-noir-black transition-colors" /></div>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 items-center">
-              <div>
+            
+            <div className="flex flex-wrap gap-4 items-center mb-2">
+              <div className="w-[120px]">
                 <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5">ESTADO</label>
-                <select value={createForm.status} onChange={(e) => setCreateForm({ ...createForm, status: e.target.value as "ACTIVE" | "DRAFT" | "ARCHIVED" })} className="w-full border border-noir-gray-2 px-4 py-2.5 text-sm outline-none focus:border-noir-black transition-colors bg-white">
+                <select value={createForm.status} onChange={(e) => setCreateForm({ ...createForm, status: e.target.value as "ACTIVE" | "DRAFT" | "ARCHIVED" })} className="w-full border border-noir-gray-2 px-3 py-2.5 text-sm outline-none focus:border-noir-black transition-colors bg-white">
                   <option value="DRAFT">Borrador</option><option value="ACTIVE">Activo</option><option value="ARCHIVED">Archivado</option>
                 </select>
               </div>
@@ -438,12 +451,20 @@ return (
                 </button>
               </div>
               <div>
-                <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5" title="Se muestra en el carrito">ADD-ON</label>
+                <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5" title="Se muestra en el carrito de compras">ES ADD-ON</label>
                 <button type="button" onClick={() => setCreateForm({ ...createForm, isAddon: !createForm.isAddon })} className={`flex items-center gap-2 text-xs font-bold uppercase transition-colors px-2 py-2.5 ${createForm.isAddon ? "text-blue-600" : "text-noir-gray-4"}`}>
                   {createForm.isAddon ? <ToggleRight size={22} /> : <ToggleLeft size={22} />} Sí
                 </button>
               </div>
+              <div>
+                {/* 💡 NUEVO: Switch "Mostrar Promo" */}
+                <label className="block text-[10px] font-bold tracking-widest uppercase mb-1.5" title="Muestra el botón de Add The Look en este producto">MOSTRAR PROMOCIÓN</label>
+                <button type="button" onClick={() => setCreateForm({ ...createForm, hasAddon: !createForm.hasAddon })} className={`flex items-center gap-2 text-xs font-bold uppercase transition-colors px-2 py-2.5 ${createForm.hasAddon ? "text-purple-600" : "text-noir-gray-4"}`}>
+                  {createForm.hasAddon ? <ToggleRight size={22} /> : <ToggleLeft size={22} />} Sí
+                </button>
+              </div>
             </div>
+
             <ImageUploader images={createForm.images} onChange={(urls) => setCreateForm({ ...createForm, images: urls })} />
             <div className="flex gap-3 pt-2">
               <button type="submit" disabled={creating} className="flex items-center gap-2 bg-noir-black text-white px-7 py-3 text-xs font-bold tracking-widest uppercase hover:bg-black transition-colors disabled:opacity-60">

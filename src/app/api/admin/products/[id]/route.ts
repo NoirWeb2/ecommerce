@@ -25,8 +25,9 @@ if (!admin) return NextResponse.json({ error: "No autorizado" }, { status: 401 }
 try {
   const { id } = await params;
   const body = await req.json();
-  // 💡 NUEVO: Desestructuramos el isAddon y el isNew para leerlos al editar
-  const { name, sku, price, stock, status, categoryName, description, images, isFeatured, isAddon, isNew } = body;
+  
+  // 💡 NUEVO: Recibimos hasAddon
+  const { name, sku, price, stock, status, categoryName, description, images, isFeatured, isAddon, isNew, hasAddon } = body;
 
   const updateData: Record<string, unknown> = {};
 
@@ -36,8 +37,15 @@ try {
   if (status !== undefined) updateData.status = status;
   if (description !== undefined) updateData.description = description;
   if (isFeatured !== undefined) updateData.isFeatured = isFeatured;
-  if (isNew !== undefined) updateData.isNew = isNew; // 💡 NUEVO: Actualizamos si es nuevo o no
-  if (isAddon !== undefined) updateData.tags = isAddon ? ["ADDON"] : [];
+  if (isNew !== undefined) updateData.isNew = isNew;
+
+  // 💡 PASO 2: Actualizamos ambas etiquetas al editar
+  if (isAddon !== undefined && hasAddon !== undefined) {
+    const tags = [];
+    if (isAddon) tags.push("ADDON");
+    if (hasAddon) tags.push("HAS_ADDON");
+    updateData.tags = tags;
+  }
 
   // 💡 FIX EXACTO: Si envían categoría, revisamos bien qué enviaron
   if (categoryName !== undefined) {

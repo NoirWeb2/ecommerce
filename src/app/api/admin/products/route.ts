@@ -64,8 +64,8 @@ if (!admin) return NextResponse.json({ error: "No autorizado" }, { status: 401 }
 // 💡 FIX: SALVAVIDAS PUESTO
 try {
   const body = await req.json();
-  // 💡 NUEVO: Desestructuramos el isAddon y el isNew para leerlos
-  const { name, sku, price, stock, status, categoryName, description, images, isFeatured, isAddon, isNew } = body;
+  // 💡 PASO 1: Ahora también desestructuramos "hasAddon"
+  const { name, sku, price, stock, status, categoryName, description, images, isFeatured, isAddon, isNew, hasAddon } = body;
 
   const slug = name
     .toLowerCase()
@@ -81,6 +81,11 @@ try {
     if (cat) categoryId = cat.id;
   }
 
+  // 💡 PASO 1: Armamos la lista de etiquetas combinando ambos switches
+  const tags = [];
+  if (isAddon) tags.push("ADDON");
+  if (hasAddon) tags.push("HAS_ADDON");
+
   const product = await prisma.product.create({
     data: {
       name,
@@ -91,9 +96,8 @@ try {
       description,
       categoryId,
       isFeatured: isFeatured ?? false,
-      isNew: isNew ?? false, // 💡 NUEVO: Lo guardamos en la BD
-      // Si está el switch prendido, le ponemos la etiqueta "ADDON"
-      tags: isAddon ? ["ADDON"] : [], 
+      isNew: isNew ?? false,
+      tags: tags, // 💡 Guardamos las etiquetas en la Base de Datos
       variants: stock > 0
         ? { create: [{ size: "UNICO", stock: Number(stock) }] }
         : undefined,

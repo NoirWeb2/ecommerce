@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import ProductoClient from "./ProductoClient";
 
+export const dynamic = "force-dynamic"; // 🚀 Bala de plata anti-caché
 export const revalidate = 0;
 
 async function getProduct(slug: string) {
@@ -34,13 +35,13 @@ try {
 }
 }
 
-// 💡 NUEVA FUNCIÓN: Busca el producto configurado como ADDON
+// 💡 FUNCIÓN: Busca el producto configurado como ADDON (El Gel eGo)
 async function getAddon() {
 try {
   return await prisma.product.findFirst({
     where: { 
       status: "ACTIVE", 
-      tags: { has: "ADDON" } // Busca la etiqueta oculta que le pusimos en el Admin
+      tags: { has: "ADDON" } 
     },
     include: {
       images: { orderBy: { order: "asc" } },
@@ -68,7 +69,10 @@ const product = await getProduct(slug);
 if (!product) notFound();
 
 const related = await getRelated(product.categoryId, product.id);
-const addon = await getAddon(); // 💡 Llamamos al Addon
+
+// 💡 LÓGICA NUEVA: Solo busca y manda el Addon si este producto tiene el switch "Mostrar Promoción" encendido
+const showAddon = product.tags?.includes("HAS_ADDON") || false;
+const addon = showAddon ? await getAddon() : null;
 
 const mapped = {
   id: product.id,
@@ -102,6 +106,5 @@ const addonMapped = addon ? {
   sizes: [...new Set(addon.variants.map((v) => v.size).filter(Boolean))] as string[],
 } : null;
 
-// 💡 Le pasamos el addon al Frontend
 return <ProductoClient product={mapped} related={relatedMapped} addon={addonMapped} />;
 }
