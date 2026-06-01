@@ -56,11 +56,9 @@ try {
   const textMap: Record<string, string> = {};
   for (const s of textSettings) textMap[s.key] = s.value;
 
-  // 3. 💡 PRODUCTOS DESTACADOS (Filtro Relajado: solo isFeatured)
+  // 3. 🚨 TRAMPA DIAGNÓSTICA: Traemos CUALQUIER 5 PRODUCTOS
   const featuredProducts = await prisma.product.findMany({
-    where: { 
-      isFeatured: true
-    },
+    where: {}, // 👈 TOTALMENTE VACÍO, SIN FILTROS
     take: 5, 
     include: { 
       images: { orderBy: { order: "asc" } }, 
@@ -68,11 +66,9 @@ try {
     } 
   });
 
-  // 4. 💡 PRODUCTOS NUEVOS (Filtro Relajado: solo isNew)
+  // 4. 🚨 TRAMPA DIAGNÓSTICA: Traemos OTROS 5 PRODUCTOS
   const newProducts = await prisma.product.findMany({
-    where: { 
-      isNew: true
-    },
+    where: {}, // 👈 TOTALMENTE VACÍO, SIN FILTROS
     take: 5,
     include: { 
       images: { orderBy: { order: "asc" } }, 
