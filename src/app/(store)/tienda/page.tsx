@@ -14,6 +14,7 @@ try {
   const products = await prisma.product.findMany({
     where: { 
       status: "ACTIVE"
+      isAddon: false //
     },
     include: {
       images: { orderBy: { order: "asc" } },
