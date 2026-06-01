@@ -13,8 +13,8 @@ async function getProducts() {
 try {
   const products = await prisma.product.findMany({
     where: { 
-      status: "ACTIVE"
-      isAddon: false //
+      status: "ACTIVE",
+      isAddon: false
     },
     include: {
       images: { orderBy: { order: "asc" } },
