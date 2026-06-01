@@ -7,14 +7,17 @@ title: "Tienda — NOIR LOVERS",
 description: "Explora toda la colección de NOIR LOVERS. Moda masculina oscura, hecha en Bogotá, Colombia.",
 };
 
-export const dynamic = "force-dynamic"; // Opcional, pero recomendado para que la tienda siempre muestre el stock real
+export const dynamic = "force-dynamic";
+
+// 💡 FIX: Bloqueamos la talla "UNICO" para que no salga en las tarjetas de la tienda
+const ALLOWED_SIZES = ["S", "M", "L", "XL"];
 
 async function getProducts() {
 try {
   const products = await prisma.product.findMany({
     where: { 
       status: "ACTIVE",
-      isAddon: false
+      isAddon: false // 🛡️ Bloquea el gel eGo y la Barbería
     },
     include: {
       images: { orderBy: { order: "asc" } },
@@ -55,7 +58,11 @@ return (
               price={p.price}
               comparePrice={p.comparePrice ?? undefined}
               images={p.images.map((img) => img.url)}
-              sizes={[...new Set(p.variants.map((v) => v.size).filter(Boolean))] as string[]}
+              // 💡 FIX: Filtramos las tallas para que UNICO no aparezca
+              sizes={[...new Set(p.variants
+                .map((v) => v.size)
+                .filter((size) => size && ALLOWED_SIZES.includes(size))
+              )] as string[]}
               isNew={p.isNew}
             />
           ))}

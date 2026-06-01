@@ -56,9 +56,13 @@ try {
   const textMap: Record<string, string> = {};
   for (const s of textSettings) textMap[s.key] = s.value;
 
-  // 3. 🚨 TRAMPA DIAGNÓSTICA: Traemos CUALQUIER 5 PRODUCTOS
+  // 3. 🛡️ PRODUCTOS DESTACADOS: Activos, Destacados y que NO sean Gel eGo (isAddon: false)
   const featuredProducts = await prisma.product.findMany({
-    where: {}, // 👈 TOTALMENTE VACÍO, SIN FILTROS
+    where: { 
+      isFeatured: true,
+      status: "ACTIVE",
+      isAddon: false
+    },
     take: 5, 
     include: { 
       images: { orderBy: { order: "asc" } }, 
@@ -66,9 +70,13 @@ try {
     } 
   });
 
-  // 4. 🚨 TRAMPA DIAGNÓSTICA: Traemos OTROS 5 PRODUCTOS
+  // 4. 🛡️ PRODUCTOS NUEVOS: Activos, Nuevos y que NO sean Gel eGo (isAddon: false)
   const newProducts = await prisma.product.findMany({
-    where: {}, // 👈 TOTALMENTE VACÍO, SIN FILTROS
+    where: { 
+      isNew: true,
+      status: "ACTIVE",
+      isAddon: false
+    },
     take: 5,
     include: { 
       images: { orderBy: { order: "asc" } }, 
