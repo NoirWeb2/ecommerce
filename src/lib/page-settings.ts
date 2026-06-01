@@ -16,7 +16,6 @@ collection1Banner: BannerData;
 collection2Banner: BannerData;
 announcementText: string;
 heroSub: string;
-// 👇 1. Agregamos los productos a la interfaz para que TypeScript no pelee
 featuredProducts: any[]; 
 newProducts: any[];
 }
@@ -51,7 +50,6 @@ collection2Banner: {
 },
 announcementText: "🖤 ENVÍO GRATIS EN PEDIDOS +$250.000 — CÓDIGO: NOIR10 — 10% OFF EN TU PRIMERA COMPRA",
 heroSub: "Nueva colección disponible",
-// 👇 Valores por defecto vacíos si falla la BD
 featuredProducts: [],
 newProducts: [],
 };
@@ -67,7 +65,7 @@ try {
 
 export async function getHomePageData(): Promise<HomePageData> {
 try {
-  // Traemos configuraciones de Banners y Textos (Lo que ya tenías)
+  // 1. Traemos configuraciones de Banners y Textos
   const settings = await prisma.siteSetting.findMany({
     where: { section: "banners" },
   });
@@ -80,23 +78,32 @@ try {
   const textMap: Record<string, string> = {};
   for (const s of textSettings) textMap[s.key] = s.value;
 
-  // 👇 2. AQUÍ ESTÁ LA MAGIA: Traemos los productos de la BD
-  // (Asegúrate de que tus campos se llamen isFeatured e isNew en tu schema.prisma)
+  // 2. Traemos los productos DESTACADOS (Activos, con fotos y ocultando el Gel)
   const featuredProducts = await prisma.product.findMany({
     where: { 
       isFeatured: true,
-      // isActive: true // Descomenta esto si tienes un switch para ocultar productos
+      status: "ACTIVE",
+      isAddon: false
     },
-    take: 4, // Para que solo muestre 4 y se vea elegante
-    // include: { product_images: true, variants: true } // Descomenta si necesitas traer las imágenes relacionadas
+    take: 5, 
+    include: { 
+      images: { orderBy: { order: "asc" } }, 
+      variants: true 
+    } 
   });
 
+  // 3. Traemos los productos NUEVOS (Activos, con fotos y ocultando el Gel)
   const newProducts = await prisma.product.findMany({
     where: { 
       isNew: true,
+      status: "ACTIVE",
+      isAddon: false
     },
-    take: 4,
-    // include: { product_images: true, variants: true }
+    take: 5,
+    include: { 
+      images: { orderBy: { order: "asc" } }, 
+      variants: true 
+    }
   });
 
   return {
@@ -105,12 +112,11 @@ try {
     collection2Banner: parseBanner(map["collection2"], DEFAULTS.collection2Banner),
     announcementText: textMap["announcement"] ?? DEFAULTS.announcementText,
     heroSub: textMap["hero_sub"] ?? DEFAULTS.heroSub,
-    // 👇 3. Se los enviamos al Home
     featuredProducts,
     newProducts,
   };
 } catch (error) {
-  console.error("Error cargando la data del Home:", error);
+  console.error("🔥 ERROR CARGANDO LA DATA DEL HOME:", error);
   return DEFAULTS;
 }
 }
