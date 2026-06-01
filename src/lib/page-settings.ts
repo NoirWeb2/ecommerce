@@ -20,35 +20,11 @@ featuredProducts: any[];
 newProducts: any[];
 }
 
-// 👇 DEFAULTS LIMPIOS: Si algo falla, es mejor no mostrar nada a mostrar algo viejo
+// 👇 DEFAULTS LIMPIOS
 const DEFAULTS: HomePageData = {
-heroBanner: {
-  image: "",
-  headline: "",
-  subtext: "",
-  cta: "",
-  ctaLink: "",
-  textColor: "white",
-  visible: false, 
-},
-collection1Banner: {
-  image: "",
-  headline: "",
-  subtext: "",
-  cta: "",
-  ctaLink: "",
-  textColor: "black",
-  visible: false,
-},
-collection2Banner: {
-  image: "",
-  headline: "",
-  subtext: "",
-  cta: "",
-  ctaLink: "",
-  textColor: "black",
-  visible: false,
-},
+heroBanner: { image: "", headline: "", subtext: "", cta: "", ctaLink: "", textColor: "white", visible: false },
+collection1Banner: { image: "", headline: "", subtext: "", cta: "", ctaLink: "", textColor: "black", visible: false },
+collection2Banner: { image: "", headline: "", subtext: "", cta: "", ctaLink: "", textColor: "black", visible: false },
 announcementText: "",
 heroSub: "",
 featuredProducts: [],
@@ -80,12 +56,10 @@ try {
   const textMap: Record<string, string> = {};
   for (const s of textSettings) textMap[s.key] = s.value;
 
-  // 3. Traemos los productos DESTACADOS (Activos, con fotos y ocultando el Gel)
+  // 3. 💡 PRODUCTOS DESTACADOS (Filtro Relajado: solo isFeatured)
   const featuredProducts = await prisma.product.findMany({
     where: { 
-      isFeatured: true,
-      status: "ACTIVE",
-      isAddon: false
+      isFeatured: true
     },
     take: 5, 
     include: { 
@@ -94,12 +68,10 @@ try {
     } 
   });
 
-  // 4. Traemos los productos NUEVOS (Activos, con fotos y ocultando el Gel)
+  // 4. 💡 PRODUCTOS NUEVOS (Filtro Relajado: solo isNew)
   const newProducts = await prisma.product.findMany({
     where: { 
-      isNew: true,
-      status: "ACTIVE",
-      isAddon: false
+      isNew: true
     },
     take: 5,
     include: { 
@@ -119,8 +91,6 @@ try {
   };
 } catch (error: any) {
   console.error("🔥 ERROR FATAL CARGANDO LA DATA DEL HOME:", error);
-  
-  // 👇 ESTO ROMPERÁ LA PÁGINA A PROPÓSITO MOSTRANDO EL ERROR REAL EN VERCEL:
   throw new Error(`ERROR AL CARGAR LA BASE DE DATOS: ${error?.message || error}`);
 }
 }
