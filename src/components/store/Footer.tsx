@@ -24,13 +24,13 @@ const DEFAULT_COL1: NavLink[] = [
 { label: "Chaquetas", href: "/categoria/chaquetas" },
 ];
 
-const DEFAULT_COL2: NavLink[] = [
+// 💡 RUTAS FORZADAS Y BLINDADAS
+const FORCED_COL2: NavLink[] = [
 { label: "Contacto", href: "/contacto" },
-// { label: "Guía de tallas", href: "/tallas" }, // Descomentar cuando la tengas
+// { label: "Guía de tallas", href: "/tallas" }, 
 { label: "Envíos y devoluciones", href: "/legal/envios-y-devoluciones" },
 { label: "Términos y condiciones", href: "/legal/terminos-y-condiciones" },
 { label: "Política de privacidad", href: "/legal/politica-de-privacidad" },
-// { label: "Preguntas frecuentes", href: "/faq" }, 
 ];
 
 interface Props {
@@ -38,11 +38,13 @@ footerData?: FooterData | null;
 }
 
 export default function Footer({ footerData }: Props) {
-// Usa datos del admin o fallback a hardcoded
+// Tagline y Col 1 siguen leyendo del administrador si quieres cambiarlos
 const tagline = footerData?.tagline 
   ?? "Moda masculina oscura. Para hombres que saben lo que quieren. Bogotá, Colombia.";
 const col1 = footerData?.col1Links ?? DEFAULT_COL1;
-const col2 = footerData?.col2Links ?? DEFAULT_COL2;
+
+// 💡 FIX: La Columna 2 AHORA IGNORA AL ADMINISTRADOR y usa nuestras rutas forzadas
+const col2 = FORCED_COL2;
 
 return (
   <footer className="bg-noir-black text-white">
