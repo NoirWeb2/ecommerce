@@ -25,11 +25,12 @@ const DEFAULT_COL1: NavLink[] = [
 ];
 
 const DEFAULT_COL2: NavLink[] = [
-{ label: "Envíos y devoluciones", href: "/envios" },
-{ label: "Guía de tallas", href: "/tallas" },
-{ label: "Preguntas frecuentes", href: "/faq" },
 { label: "Contacto", href: "/contacto" },
-{ label: "Privacidad", href: "/privacidad" },
+// { label: "Guía de tallas", href: "/tallas" }, // Descomentar cuando la tengas
+{ label: "Envíos y devoluciones", href: "/legal/envios-y-devoluciones" },
+{ label: "Términos y condiciones", href: "/legal/terminos-y-condiciones" },
+{ label: "Política de privacidad", href: "/legal/politica-de-privacidad" },
+// { label: "Preguntas frecuentes", href: "/faq" }, 
 ];
 
 interface Props {

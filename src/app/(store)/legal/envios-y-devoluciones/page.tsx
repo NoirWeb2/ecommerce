@@ -2,35 +2,43 @@ import React from 'react';
 
 export const metadata = {
 title: 'Envíos y Devoluciones | NOIR LOVERS',
-description: 'Políticas de envío, cambios y devoluciones de NOIR LOVERS.',
 };
 
 export default function EnviosDevolucionesPage() {
 return (
-  <div className="max-w-4xl mx-auto px-4 py-16 bg-[#dfe1e6]"> 
-    <h1 className="text-3xl font-bold mb-8 uppercase tracking-widest text-black">
+  <div className="max-w-4xl mx-auto px-6 py-20"> 
+    <h1 className="text-4xl font-black mb-10 uppercase tracking-widest text-black">
       Envíos y Devoluciones
     </h1>
-    
-    <div className="space-y-6 text-gray-800 leading-relaxed">
+    <div className="space-y-8 text-black leading-relaxed">
+      
       <section>
-        <h2 className="text-xl font-semibold mb-3 text-black">Tiempos de Envío</h2>
-        <p>
-          Todos nuestros envíos se despachan en un plazo de 1 a 3 días hábiles tras la confirmación del pago. Los tiempos de tránsito dependen de la transportadora y la ciudad de destino (generalmente 2 a 5 días hábiles a nivel nacional). Te enviaremos un número de guía tan pronto tu pedido salga de nuestra bodega.
+        <h2 className="text-xl font-bold mb-3 uppercase tracking-widest">Envíos</h2>
+        <p className="text-gray-700">
+          Despachamos desde Bogotá. Tu pedido será procesado en 1 a 2 días hábiles tras la confirmación del pago. El tiempo estimado de entrega de la transportadora es de 2 a 5 días hábiles dependiendo de tu ciudad.
         </p>
       </section>
 
       <section>
-        <h2 className="text-xl font-semibold mb-3 text-black">Políticas de Cambio</h2>
-        <p>
-          Dado el carácter premium de nuestras prendas, aceptamos cambios de talla dentro de los primeros <strong>15 días calendario</strong> posteriores a la entrega. La prenda debe estar en perfectas condiciones, sin uso, sin lavar, sin olores y con todas sus etiquetas y empaques originales intactos. Los costos de envío por cambios de talla son asumidos por el cliente.
+        <h2 className="text-xl font-bold mb-3 uppercase tracking-widest">Cambios y Garantías (30 Días)</h2>
+        <p className="text-gray-700 mb-4">
+          Tienes un máximo de <strong>30 días calendario</strong> desde que recibes tu pedido para solicitar un cambio de talla o reportar un defecto de fábrica. 
         </p>
+        <p className="text-gray-700 mb-4">
+          <strong>Requisitos para cambios:</strong> La prenda debe estar en su estado original, sin usar, sin lavar, sin olores y con todas las etiquetas puestas.
+        </p>
+        <p className="text-gray-700 font-bold mt-4">Lo que NO cubre la garantía:</p>
+        <ul className="list-disc pl-5 text-gray-700 space-y-1 mt-2">
+          <li>Daños causados por el cliente (quemaduras, roturas por mal uso, manchas).</li>
+          <li>Desgaste natural de la prenda por el uso.</li>
+          <li>Daños por no seguir las instrucciones de lavado (ej. planchar estampados, usar blanqueador).</li>
+        </ul>
       </section>
 
       <section>
-        <h2 className="text-xl font-semibold mb-3 text-black">Derecho de Retracto</h2>
-        <p>
-          De acuerdo con la Ley colombiana, tienes derecho al retracto dentro de los <strong>5 días hábiles</strong> siguientes a la entrega del producto. Debes devolver la prenda en las mismas condiciones en que la recibiste. Los costos de transporte para la devolución corren por cuenta del comprador.
+        <h2 className="text-xl font-bold mb-3 uppercase tracking-widest">Proceso</h2>
+        <p className="text-gray-700">
+          Para iniciar un cambio, escríbenos a nuestro canal de soporte con tu número de orden. Nuestro equipo evaluará el caso. Si el cambio es por talla, los costos de envío son asumidos por el cliente. Si es por defecto de fábrica comprobado, nosotros asumimos el envío.
         </p>
       </section>
     </div>

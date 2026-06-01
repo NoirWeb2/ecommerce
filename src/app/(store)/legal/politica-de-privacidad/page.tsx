@@ -2,35 +2,34 @@ import React from 'react';
 
 export const metadata = {
 title: 'Política de Privacidad | NOIR LOVERS',
-description: 'Política de tratamiento de datos personales de NOIR LOVERS.',
 };
 
 export default function PrivacidadPage() {
 return (
-  <div className="max-w-4xl mx-auto px-4 py-16 bg-[#dfe1e6]"> 
-    <h1 className="text-3xl font-bold mb-8 uppercase tracking-widest text-black">
+  <div className="max-w-4xl mx-auto px-6 py-20"> 
+    <h1 className="text-4xl font-black mb-10 uppercase tracking-widest text-black">
       Política de Privacidad
     </h1>
-    
-    <div className="space-y-6 text-gray-800 leading-relaxed">
+    <div className="space-y-8 text-black leading-relaxed">
+      
       <section>
-        <h2 className="text-xl font-semibold mb-3">1. Tratamiento de Datos (Habeas Data)</h2>
-        <p>
-          En cumplimiento de la Ley 1581 de 2012 de Colombia, NOIR LOVERS garantiza el manejo adecuado y confidencial de tus datos personales. La información que recolectamos (nombre, dirección, correo, teléfono) se usa exclusivamente para el procesamiento de tus pedidos y envíos.
+        <h2 className="text-xl font-bold mb-3 uppercase tracking-widest">Manejo de Datos (Habeas Data)</h2>
+        <p className="text-gray-700">
+          En cumplimiento con la ley colombiana, en NOIR LOVERS nos tomamos muy en serio tu privacidad. Los datos que nos proporcionas (nombre, correo, dirección, teléfono) se utilizan EXCLUSIVAMENTE para procesar y enviar tus pedidos, y para enviarte información relevante sobre nuevas colecciones si así lo autorizas.
         </p>
       </section>
 
       <section>
-        <h2 className="text-xl font-semibold mb-3">2. Compartición de Información</h2>
-        <p>
-          Tus datos de pago son procesados de manera encriptada por nuestra pasarela de pagos (Wompi). NOIR LOVERS no almacena, ni tiene acceso a la información de tus tarjetas de crédito o cuentas bancarias.
+        <h2 className="text-xl font-bold mb-3 uppercase tracking-widest">Protección de la Información</h2>
+        <p className="text-gray-700">
+          Jamás venderemos, alquilaremos ni compartiremos tu información personal con terceros ajenos al proceso de compra y envío (transportadoras).
         </p>
       </section>
 
       <section>
-        <h2 className="text-xl font-semibold mb-3">3. Tus Derechos</h2>
-        <p>
-          Tienes derecho a conocer, actualizar, rectificar y solicitar la eliminación de tus datos personales de nuestra base de datos en cualquier momento escribiendo a nuestro correo de soporte.
+        <h2 className="text-xl font-bold mb-3 uppercase tracking-widest">Tus Derechos</h2>
+        <p className="text-gray-700">
+          Tienes derecho a conocer, actualizar y solicitar la eliminación de tus datos de nuestra base en cualquier momento. Solo envíanos un correo a nuestro equipo de soporte.
         </p>
       </section>
     </div>
