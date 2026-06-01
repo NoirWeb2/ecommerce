@@ -21,12 +21,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 const admin = await requireAdmin();
 if (!admin) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 
-// 💡 FIX: SALVAVIDAS PUESTO
 try {
   const { id } = await params;
   const body = await req.json();
   
-  // 💡 NUEVO: Recibimos hasAddon
   const { name, sku, price, stock, status, categoryName, description, images, isFeatured, isAddon, isNew, hasAddon } = body;
 
   const updateData: Record<string, unknown> = {};
@@ -36,21 +34,23 @@ try {
   if (price !== undefined) updateData.price = Number(price);
   if (status !== undefined) updateData.status = status;
   if (description !== undefined) updateData.description = description;
+  
+  // 👇 AQUÍ ESTÁ LA MAGIA DE LOS SWITCHES
   if (isFeatured !== undefined) updateData.isFeatured = isFeatured;
   if (isNew !== undefined) updateData.isNew = isNew;
+  if (isAddon !== undefined) updateData.isAddon = isAddon; // ¡ESTO FALTABA!
 
-  // 💡 PASO 2: Actualizamos ambas etiquetas al editar
-  if (isAddon !== undefined && hasAddon !== undefined) {
+  // Actualizamos las etiquetas (tags) para compatibilidad
+  if (isAddon !== undefined || hasAddon !== undefined) {
     const tags = [];
     if (isAddon) tags.push("ADDON");
     if (hasAddon) tags.push("HAS_ADDON");
     updateData.tags = tags;
   }
 
-  // 💡 FIX EXACTO: Si envían categoría, revisamos bien qué enviaron
   if (categoryName !== undefined) {
     if (categoryName === "" || categoryName === "— Sin categoría —") {
-      updateData.categoryId = null; // Lo desvincula de cualquier categoría
+      updateData.categoryId = null;
     } else {
       const cat = await prisma.category.findFirst({ where: { name: categoryName } });
       if (cat) updateData.categoryId = cat.id;
@@ -62,17 +62,17 @@ try {
     data: updateData,
   });
 
-  // 💡 FIX STOCK: Actualiza el stock principal en la variante UNICO por defecto
+  // 👇 FIX ZOMBIE: Si actualizan el stock desde esta pantalla, se lo asignamos a la talla "M" en vez de "UNICO"
   if (stock !== undefined) {
-    const existing = await prisma.variant.findFirst({ where: { productId: id, size: "UNICO" } });
-    if (existing) {
-      await prisma.variant.update({ where: { id: existing.id }, data: { stock: Number(stock) } });
+    const existingM = await prisma.variant.findFirst({ where: { productId: id, size: "M" } });
+    if (existingM) {
+      await prisma.variant.update({ where: { id: existingM.id }, data: { stock: Number(stock) } });
     } else {
-      await prisma.variant.create({ data: { productId: id, size: "UNICO", stock: Number(stock) } });
+      // Por si acaso es un producto viejísimo que no tenía variantes, le creamos la M
+      await prisma.variant.create({ data: { productId: id, size: "M", stock: Number(stock) } });
     }
   }
 
-  // 💡 FIX IMÁGENES: Reemplaza todo de forma limpia
   if (images !== undefined) {
     await prisma.productImage.deleteMany({ where: { productId: id } });
     if (images.length > 0) {
@@ -98,7 +98,6 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
 const admin = await requireAdmin();
 if (!admin) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 
-// 💡 FIX: SALVAVIDAS PUESTO
 try {
   const { id } = await params;
   await prisma.product.delete({ where: { id } });
