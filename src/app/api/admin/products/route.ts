@@ -23,7 +23,6 @@ export async function GET(req: NextRequest) {
 const admin = await requireAdmin();
 if (!admin) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 
-// 💡 FIX: SALVAVIDAS PUESTO
 try {
   const { searchParams } = new URL(req.url);
   const search = searchParams.get("search") || "";
@@ -53,7 +52,7 @@ try {
   return NextResponse.json({ products });
 } catch (error) {
   console.error("Error cargando productos:", error);
-  return NextResponse.json({ products: [] }); // Si falla, devuelve una lista vacía y no explota
+  return NextResponse.json({ products: [] }); 
 }
 }
 
@@ -61,10 +60,8 @@ export async function POST(req: NextRequest) {
 const admin = await requireAdmin();
 if (!admin) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 
-// 💡 FIX: SALVAVIDAS PUESTO
 try {
   const body = await req.json();
-  // 💡 PASO 1: Ahora también desestructuramos "hasAddon"
   const { name, sku, price, stock, status, categoryName, description, images, isFeatured, isAddon, isNew, hasAddon } = body;
 
   const slug = name
@@ -81,7 +78,6 @@ try {
     if (cat) categoryId = cat.id;
   }
 
-  // 💡 PASO 1: Armamos la lista de etiquetas combinando ambos switches
   const tags = [];
   if (isAddon) tags.push("ADDON");
   if (hasAddon) tags.push("HAS_ADDON");
@@ -97,10 +93,16 @@ try {
       categoryId,
       isFeatured: isFeatured ?? false,
       isNew: isNew ?? false,
-      tags: tags, // 💡 Guardamos las etiquetas en la Base de Datos
-      variants: stock > 0
-        ? { create: [{ size: "UNICO", stock: Number(stock) }] }
-        : undefined,
+      isAddon: isAddon ?? false, // 👈 Ahora el switch SÍ se guarda en la base de datos
+      tags: tags, 
+      variants: {  // 👈 Ahora se crean siempre las 4 tallas por defecto
+        create: [
+          { size: "S", stock: 0 },
+          { size: "M", stock: stock > 0 ? Number(stock) : 0 },
+          { size: "L", stock: 0 },
+          { size: "XL", stock: 0 }
+        ]
+      },
       images: images?.length
         ? { create: images.map((url: string, i: number) => ({ url, order: i })) }
         : undefined,
