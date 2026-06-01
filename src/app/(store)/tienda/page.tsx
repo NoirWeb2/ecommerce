@@ -13,8 +13,7 @@ async function getProducts() {
 try {
   const products = await prisma.product.findMany({
     where: { 
-      status: "ACTIVE",
-      isAddon: false // 👈 ¡ESTA ES LA MAGIA! Oculta todo lo que marcaste como Add-on
+      status: "ACTIVE"
     },
     include: {
       images: { orderBy: { order: "asc" } },
