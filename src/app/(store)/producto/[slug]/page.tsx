@@ -6,6 +6,9 @@ import ProductoClient from "./ProductoClient";
 export const dynamic = "force-dynamic"; // 🚀 Bala de plata anti-caché
 export const revalidate = 0;
 
+// 💡 FIX: Lista de tallas permitidas para la ropa
+const ALLOWED_SIZES = ["S", "M", "L", "XL"];
+
 async function getProduct(slug: string) {
 try {
   return await prisma.product.findUnique({
@@ -25,7 +28,7 @@ async function getRelated(categoryId: string | null, excludeId: string) {
 if (!categoryId) return [];
 try {
   const products = await prisma.product.findMany({
-    where: { status: "ACTIVE", categoryId, id: { not: excludeId } },
+    where: { status: "ACTIVE", categoryId, id: { not: excludeId }, isAddon: false }, // También evitamos que el gel salga en "Relacionados"
     include: { images: { orderBy: { order: "asc" } }, variants: true },
     take: 4,
   });
@@ -35,7 +38,6 @@ try {
 }
 }
 
-// 💡 FUNCIÓN: Busca el producto configurado como ADDON (El Gel eGo)
 async function getAddon() {
 try {
   return await prisma.product.findFirst({
@@ -70,7 +72,6 @@ if (!product) notFound();
 
 const related = await getRelated(product.categoryId, product.id);
 
-// 💡 LÓGICA NUEVA: Solo busca y manda el Addon si este producto tiene el switch "Mostrar Promoción" encendido
 const showAddon = product.tags?.includes("HAS_ADDON") || false;
 const addon = showAddon ? await getAddon() : null;
 
@@ -82,7 +83,11 @@ const mapped = {
   comparePrice: product.comparePrice,
   description: product.description,
   images: product.images.map((img) => img.url),
-  sizes: [...new Set(product.variants.map((v) => v.size).filter(Boolean))] as string[],
+  // 💡 FIX: Filtramos las tallas para que solo pasen S, M, L, XL
+  sizes: [...new Set(product.variants
+    .map((v) => v.size)
+    .filter((size) => size && ALLOWED_SIZES.includes(size))
+  )] as string[],
   category: product.category?.name || "",
 };
 
@@ -93,10 +98,13 @@ const relatedMapped = related.map((p) => ({
   price: p.price,
   comparePrice: p.comparePrice ?? undefined,
   images: p.images.map((img) => img.url),
-  sizes: [...new Set(p.variants.map((v) => v.size).filter(Boolean))] as string[],
+  // 💡 FIX: Filtramos también los relacionados
+  sizes: [...new Set(p.variants
+    .map((v) => v.size)
+    .filter((size) => size && ALLOWED_SIZES.includes(size))
+  )] as string[],
 }));
 
-// Mapeamos el addon si existe
 const addonMapped = addon ? {
   id: addon.id,
   name: addon.name,
