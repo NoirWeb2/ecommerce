@@ -20,36 +20,37 @@ featuredProducts: any[];
 newProducts: any[];
 }
 
+// 👇 DEFAULTS LIMPIOS: Si algo falla, es mejor no mostrar nada a mostrar algo viejo
 const DEFAULTS: HomePageData = {
 heroBanner: {
-  image: "/hero-main.jpg",
-  headline: "VISTE LA OSCURIDAD.",
-  subtext: "Nueva colección disponible",
-  cta: "VER COLECCIÓN",
-  ctaLink: "/tienda",
+  image: "",
+  headline: "",
+  subtext: "",
+  cta: "",
+  ctaLink: "",
   textColor: "white",
-  visible: true,
+  visible: false, 
 },
 collection1Banner: {
-  image: "/banner-collection-1.webp",
-  headline: "UNIQUE VIBE",
-  subtext: "Colección completa",
-  cta: "EXPLORAR",
-  ctaLink: "/tienda",
+  image: "",
+  headline: "",
+  subtext: "",
+  cta: "",
+  ctaLink: "",
   textColor: "black",
-  visible: true,
+  visible: false,
 },
 collection2Banner: {
-  image: "/banner-collection-2.webp",
-  headline: "UNIQUE VIBE II",
-  subtext: "Nueva temporada",
-  cta: "VER MÁS",
-  ctaLink: "/tienda",
+  image: "",
+  headline: "",
+  subtext: "",
+  cta: "",
+  ctaLink: "",
   textColor: "black",
-  visible: true,
+  visible: false,
 },
-announcementText: "🖤 ENVÍO GRATIS EN PEDIDOS +$250.000 — CÓDIGO: NOIR10 — 10% OFF EN TU PRIMERA COMPRA",
-heroSub: "Nueva colección disponible",
+announcementText: "",
+heroSub: "",
 featuredProducts: [],
 newProducts: [],
 };
@@ -65,20 +66,21 @@ try {
 
 export async function getHomePageData(): Promise<HomePageData> {
 try {
-  // 1. Traemos configuraciones de Banners y Textos
+  // 1. Traemos configuraciones de Banners
   const settings = await prisma.siteSetting.findMany({
     where: { section: "banners" },
   });
   const map: Record<string, string> = {};
   for (const s of settings) map[s.key] = s.value;
 
+  // 2. Traemos configuraciones de Textos
   const textSettings = await prisma.siteSetting.findMany({
     where: { section: "texts" },
   });
   const textMap: Record<string, string> = {};
   for (const s of textSettings) textMap[s.key] = s.value;
 
-  // 2. Traemos los productos DESTACADOS (Activos, con fotos y ocultando el Gel)
+  // 3. Traemos los productos DESTACADOS (Activos, con fotos y ocultando el Gel)
   const featuredProducts = await prisma.product.findMany({
     where: { 
       isFeatured: true,
@@ -92,7 +94,7 @@ try {
     } 
   });
 
-  // 3. Traemos los productos NUEVOS (Activos, con fotos y ocultando el Gel)
+  // 4. Traemos los productos NUEVOS (Activos, con fotos y ocultando el Gel)
   const newProducts = await prisma.product.findMany({
     where: { 
       isNew: true,
@@ -115,8 +117,10 @@ try {
     featuredProducts,
     newProducts,
   };
-} catch (error) {
-  console.error("🔥 ERROR CARGANDO LA DATA DEL HOME:", error);
-  return DEFAULTS;
+} catch (error: any) {
+  console.error("🔥 ERROR FATAL CARGANDO LA DATA DEL HOME:", error);
+  
+  // 👇 ESTO ROMPERÁ LA PÁGINA A PROPÓSITO MOSTRANDO EL ERROR REAL EN VERCEL:
+  throw new Error(`ERROR AL CARGAR LA BASE DE DATOS: ${error?.message || error}`);
 }
 }
