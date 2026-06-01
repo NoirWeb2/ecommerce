@@ -91,20 +91,8 @@ return (
 );
 }
 
-// 🚨 PRODUCTO FALSO CREADO A MANO PARA PROBAR EL FRONTEND 🚨
-const DUMMY_PRODUCT = {
-id: "dummy-123",
-name: "🔥 CHAQUETA DE PRUEBA",
-slug: "chaqueta-prueba",
-price: 999999,
-images: [{ url: "https://via.placeholder.com/600x800/000000/FFFFFF?text=PRUEBA+FRONTEND" }],
-};
-
 export default function HomePageClient({ pageData }: { pageData: HomePageData }) {
-const { heroBanner, collection1Banner, collection2Banner } = pageData;
-
-// 🚨 REEMPLAZAMOS LOS DATOS DEL SERVIDOR POR NUESTRO PRODUCTO FALSO (Repetido 4 veces)
-const testProducts = [DUMMY_PRODUCT, DUMMY_PRODUCT, DUMMY_PRODUCT, DUMMY_PRODUCT];
+const { heroBanner, collection1Banner, collection2Banner, featuredProducts, newProducts } = pageData;
 
 return (
   <main>
@@ -138,8 +126,7 @@ return (
           DESTACADOS
         </p>
         <div className="space-y-6">
-          {/* 🚨 AQUÍ INYECTAMOS EL PRODUCTO FALSO */}
-          <ProductRow products={testProducts} emptyMessage="No hay productos destacados aún." />
+          <ProductRow products={featuredProducts || []} emptyMessage="No hay productos destacados aún." />
         </div>
       </div>
     </section>
@@ -170,8 +157,7 @@ return (
           NUEVO
         </p>
         <div className="space-y-6">
-          {/* 🚨 AQUÍ INYECTAMOS EL PRODUCTO FALSO TAMBIÉN */}
-          <ProductRow products={testProducts} emptyMessage="No hay productos nuevos aún." />
+          <ProductRow products={newProducts || []} emptyMessage="No hay productos nuevos aún." />
         </div>
         <div className="text-center mt-10">
           <Link href="/tienda" className="inline-block border border-noir-black text-[10px] font-bold tracking-[0.22em] uppercase px-10 py-[11px] hover:bg-noir-black hover:text-white transition-colors">
